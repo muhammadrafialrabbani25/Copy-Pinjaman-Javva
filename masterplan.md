@@ -174,14 +174,14 @@ pinjamanjavva/
 | **Strategy** | `PaymentScheduleService.java` | Perhitungan cicilan dengan interface yang extensible |
 | **Observer** | `DomainEventPublisher.java` + `SimpleEventBus.java` | Decoupling domain events (LoanApproved, FundingCompleted) |
 | **Factory** | `LoanAggregate.create()` | Pembuatan Loan dengan validasi bisnis terpadu |
-| **Repository** | `*Repository.java` interfaces | Abstraksi data access |
+| **Repository** | `*Repository.java` interfaces | Abstraksi data access untuk testing & decoupling (HashMap only, tidak akan ganti ke DB) |
 
 **Penjelasan Implementasi:**
 - **State:** Enum `LoanStatus` + method `canTransitionTo()` untuk validasi
 - **Strategy:** Interface `InterestCalculationStrategy` dengan implementasi `FixedInterestCalculation`
 - **Observer:** `DomainEventPublisher` publish, `SimpleEventBus` subscribe & notify
 - **Factory:** Static method `create()` dengan validasi bisnis encapsulated
-- **Repository:** Interface di domain, implementasi HashMap di infrastructure
+- **Repository:** Interface di domain untuk Mockito testing, implementasi HashMap di infrastructure (final, tidak ada DB migration)
 
 ---
 
@@ -537,8 +537,9 @@ Setiap hari 15 menit:
 5. **Scope HANYA sampai pencairan + notifikasi**
    - TIDAK perlu: payment transaction, repayment, penalty, dll
 
-6. **In-Memory HashMap CUKUP**
-   - Jangan overengineer dengan database abstraction
+6. **In-Memory HashMap FINAL (tidak akan ganti ke DB)**
+   - Repository pattern hanya untuk testing & decoupling, bukan untuk future migration
+   - HashMap cukup untuk sprint ini, fokus pada domain logic
 
 7. **5 GoF Pattern WAJIB ada, tapi jangan force**
    - Natural placement is key
