@@ -8,27 +8,31 @@
 ### 1.1 Fitur yang Dikembangkan
 
 #### Borrower (Peminjam)
-- Pendaftaran Borrower (nama, KTP, gaji)
+- Pendaftaran Borrower (nama, no telepon, alamat, KTP, selfie, gaji, pekerjaan, riwayat pinjaman)
 - Pengajuan Loan (PENDING → VERIFIED)
-- Verifikasi Data KTP (strict check)
+- Verifikasi Data KTP (strict check, nama & umur harus sesuai)
 - Pemberian Credit Score & Limit
-- Masuk List Loan (deadline 5 hari funding)
+- Masuk List Loan (deadline 5 hari funding, status EXPIRED jika > 5 hari)
 - Pencairan Dana (jika fully funded)
+- Bisa cancel aplikasi (status CANCELLED)
 
 #### Lender (Pemberi Pinjaman)
-- Pendaftaran Lender (nama, saldo)
-- Top Up Saldo
+- Pendaftaran Lender (nama, no telepon, alamat, KTP, selfie, pekerjaan, saldo awal)
+- Top Up Saldo (dengan admin fee 2%)
 - Pilih Loan dari List
 - Investasi Minimum 20% dari Loan Amount
 - Notifikasi saat fully funded
+- Bisa cancel investasi sebelum fully funded
 
 #### Core Logic
 - Validasi Limit Peminjaman (3x gaji)
 - Perhitungan Credit Score (min 600)
 - Perhitungan Cicilan Bulanan
 - State Transition: PENDING → VERIFIED → FUNDING → FUNDED → DISBURSED
+- State khusus: CANCELLED (borrower/lender cancel), EXPIRED_FUNDING (waiting > 5 hari tanpa full funding)
 - Automatic Approval jika fully funded
 - Payment Schedule Generation
+- **Admin Fee:** 2% untuk lender saat top up saldo
 
 ### 1.2 Tech Stack
 
@@ -170,14 +174,22 @@ pinjamanjavva/
 
 | Pattern | File | Tujuan |
 |---------|------|--------|
-| **State** | `LoanStatus.java` + `LoanAggregate.java` | Mengelola state transition loan (PENDING → VERIFIED → FUNDING → FUNDED → DISBURSED) |
+| **State** | `LoanStatus.java` + `LoanAggregate.java` | Mengelola state transition loan (PENDING → VERIFIED → FUNDING → FUNDED → DISBURSED, plus CANCELLED & EXPIRED_FUNDING) |
 | **Strategy** | `PaymentScheduleService.java` | Perhitungan cicilan dengan interface yang extensible |
 | **Observer** | `DomainEventPublisher.java` + `SimpleEventBus.java` | Decoupling domain events (LoanApproved, FundingCompleted) |
 | **Factory** | `LoanAggregate.create()` | Pembuatan Loan dengan validasi bisnis terpadu |
 | **Repository** | `*Repository.java` interfaces | Abstraksi data access untuk testing & decoupling (HashMap only, tidak akan ganti ke DB) |
 
 **Penjelasan Implementasi:**
-- **State:** Enum `LoanStatus` + method `canTransitionTo()` untuk validasi
+- **State:** Enum `LoanStatus` dengan values: PENDING, VERIFIED, FUNDING, FUNDED, DISBURSED, CANCELLED, EXPIRED_FUNDING
+  - Valid transitions:
+    - PENDING → VERIFIED (after KTP verification)
+    - VERIFIED → FUNDING (entering funding period)
+    - FUNDING → FUNDED (when fully invested ≥ loan amount)
+    - FUNDING → EXPIRED_FUNDING (if > 5 days waiting)
+    - FUNDED → DISBURSED (when all conditions met)
+    - Any state → CANCELLED (if borrower/lender cancels)
+  - Method: `canTransitionTo(nextStatus)` validates allowed transitions
 - **Strategy:** Interface `InterestCalculationStrategy` dengan implementasi `FixedInterestCalculation`
 - **Observer:** `DomainEventPublisher` publish, `SimpleEventBus` subscribe & notify
 - **Factory:** Static method `create()` dengan validasi bisnis encapsulated
@@ -250,11 +262,25 @@ Shared Domain (3 files):
 8. `domain/shared/Tenor.java`
 9. `domain/shared/LoanStatus.java` (Enum)
 
+**Field Specification:**
+
+| Entity | Fields | Type | Notes |
+|--------|--------|------|-------|
+| **Borrower** | id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, riwayatPinjaman | String/Money | Immutable after creation |
+| **Lender** | id, nama, noTelepon, alamat, ktp, selfie, pekerjaan, saldo | String/Money | Saldo mutable (topUp) |
+| **LoanApplication** | id, borrowerId, amount, tenor, creditScore, status, createdDate | Long/Money/Enum | status = PENDING/VERIFIED/FUNDING/FUNDED/DISBURSED/CANCELLED/EXPIRED_FUNDING |
+| **KTP** | nomorKTP, nama, tanggalLahir | String/LocalDate | Format: 16 digit, non-null checks |
+| **Investment** | id, lenderId, loanId, amount, status | Long/Money/Enum | status = ACTIVE/CANCELLED |
+| **Payment** | id, loanId, noBulan, amount, dueDate, status | Long/Money/LocalDate | status = PENDING/PAID |
+| **Money** | amount, currency | BigDecimal/String | Immutable VO with equals/hashCode |
+| **Tenor** | months | Integer | Valid: 1, 3, 6, 12 |
+| **LoanStatus** | Values | Enum | PENDING, VERIFIED, FUNDING, FUNDED, DISBURSED, CANCELLED, EXPIRED_FUNDING |
+
 **TDD Checklist:**
-- [ ] Hari 1 Pagi: `KTPTest.java` → `KTP.java` (immutability, equals)
-- [ ] Hari 1 Sore: `MoneyTest.java`, `TenorTest.java` → implementasi
-- [ ] Hari 2 Pagi: `BorrowerTest.java`, `LenderTest.java` → implementasi
-- [ ] Hari 2 Sore: `LoanApplicationTest.java`, `InvestmentTest.java`, `PaymentTest.java`
+- [ ] Hari 1 Pagi: `KTPTest.java` → `KTP.java` (immutability, equals, 16-digit format check)
+- [ ] Hari 1 Sore: `MoneyTest.java`, `TenorTest.java` → implementasi (equals/hashCode, validation)
+- [ ] Hari 2 Pagi: `BorrowerTest.java`, `LenderTest.java` → implementasi (fields sesuai table)
+- [ ] Hari 2 Sore: `LoanApplicationTest.java`, `InvestmentTest.java`, `PaymentTest.java`, `LoanStatusTest.java`
 - [ ] Push ke branch
 
 ---
@@ -287,6 +313,7 @@ Shared Domain (2 files):
 7. `domain/shared/LoanStatus.java` (extended with state transition validation)
 
 **TDD Checklist:**
+- [ ] Hari 2 Pagi: `LoanStatusTest.java` → impl (state transition validation: PENDING→VERIFIED→FUNDING→FUNDED→DISBURSED, CANCELLED, EXPIRED_FUNDING)
 - [ ] Hari 2 Pagi: `LoanApprovalServiceTest.java` → impl
 - [ ] Hari 2 Sore: `PaymentScheduleServiceTest.java`, `InvestmentServiceTest.java` → impl
 - [ ] Hari 3 Pagi: `LoanAggregateTest.java`, `LenderAggregateTest.java` → impl
@@ -320,7 +347,7 @@ Borrower DTO & Service (5 files):
 
 Lender Use Cases & DTOs (4 files):
 10. `application/lender/usecase/RegisterLenderUseCase.java`
-11. `application/lender/usecase/TopUpSaldoUseCase.java`
+11. `application/lender/usecase/TopUpSaldoUseCase.java` (kalkulasi 2% admin fee)
 12. `application/lender/usecase/InvestLoanUseCase.java` (Complex: state transition + event)
 13. `application/lender/usecase/GetAvailableLoansUseCase.java`
 
@@ -518,7 +545,21 @@ Setiap hari 15 menit:
 
 ---
 
-## 7. Peringatan Kritis
+## 7. Fee Structure
+
+| Fee Type | Value | Actor | When | Notes |
+|----------|-------|-------|------|-------|
+| **Admin Fee** | 2% | Lender | Top Up Saldo | Dipotong dari amount yang di-top up |
+| **Borrower Fee** | - | Borrower | - | TBD (belum dalam scope) |
+
+**Contoh:**
+- Lender top up Rp 10.000.000
+- Admin fee 2% = Rp 200.000
+- Saldo final = Rp 9.800.000
+
+---
+
+## 8. Peringatan Kritis
 
 ### JANGAN LUPAKAN:
 
@@ -535,7 +576,8 @@ Setiap hari 15 menit:
    - Dependency: presentation → application → domain ← infrastructure
 
 5. **Scope HANYA sampai pencairan + notifikasi**
-   - TIDAK perlu: payment transaction, repayment, penalty, dll
+   - IN-SCOPE: Register (with fields), Apply, Verify, Invest, Disburse, CANCELLED status, EXPIRED_FUNDING
+   - TIDAK perlu: File upload/storage, payment transaction, repayment, penalty, face recognition, dll
 
 6. **In-Memory HashMap FINAL (tidak akan ganti ke DB)**
    - Repository pattern hanya untuk testing & decoupling, bukan untuk future migration
@@ -555,7 +597,7 @@ Setiap hari 15 menit:
 
 ---
 
-## 8. Deliverable Akhir (Hari 7 EOD)
+## 10. Deliverable Akhir (Hari 7 EOD)
 
 **Folder Structure:**
 - ✓ `domain/` (entities, aggregates, services, repositories interface, events)
