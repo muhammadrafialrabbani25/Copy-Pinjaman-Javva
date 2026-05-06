@@ -14,7 +14,8 @@
 - Pemberian Credit Score & Limit
 - Masuk List Loan (deadline 5 hari funding, status EXPIRED jika > 5 hari)
 - Pencairan Dana (jika fully funded)
-- Bisa cancel aplikasi (status CANCELLED)
+- Bisa cancel aplikasi (status CANCELLED) - jika sudah ada investasi ≥20%, increment cancellation counter
+- Block periode 4 bulan setelah cancel ke-3x
 
 #### Lender (Pemberi Pinjaman)
 - Pendaftaran Lender (nama, no telepon, alamat, KTP, selfie, pekerjaan, saldo awal)
@@ -32,7 +33,12 @@
 - State khusus: CANCELLED (borrower/lender cancel), EXPIRED_FUNDING (waiting > 5 hari tanpa full funding)
 - Automatic Approval jika fully funded
 - Payment Schedule Generation
-- **Admin Fee:** 2% untuk lender saat top up saldo
+- **Admin Fee:** 2% untuk lender saat top up saldo (tidak dikembalikan saat cancel)
+- **Cancellation Rules:**
+  - Hanya bisa cancel saat state: PENDING, VERIFIED, FUNDING (NOT FUNDED/DISBURSED)
+  - Hanya dihitung sebagai "cancel" jika investasi sudah ≥20% dari loan amount
+  - Setelah cancel 3x (dengan investasi ≥20%): borrower diblok 4 bulan dari apply baru
+  - Refund: kembalikan full amount ke semua lender (admin fee 2% sudah diambil saat top up)
 
 ### 1.2 Tech Stack
 
@@ -234,7 +240,7 @@ IMAN (Hari 1-2)
 | **JAYA** | Hari 4-5 | 6 | Infrastructure | ← Danang | `feature/infrastructure-layer` |
 | **RAFI** | Hari 5-7 | 2 | Interfaces+Tests | ← Jaya | `feature/presentation-integration` |
 
-**Total: 35 Java files + Full test coverage**
+**Total: 37 Java files + Full test coverage** (+2 files for cancellation feature)
 
 ---
 
@@ -266,9 +272,9 @@ Shared Domain (3 files):
 
 | Entity | Fields | Type | Notes |
 |--------|--------|------|-------|
-| **Borrower** | id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, riwayatPinjaman | String/Money | Immutable after creation |
+| **Borrower** | id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, riwayatPinjaman, cancellationCount, lastBlockedDate | String/Money/Integer/LocalDateTime | cancellationCount incremented when cancel ≥20% funded; lastBlockedDate set after 3x cancel |
 | **Lender** | id, nama, noTelepon, alamat, ktp, selfie, pekerjaan, saldo | String/Money | Saldo mutable (topUp) |
-| **LoanApplication** | id, borrowerId, amount, tenor, creditScore, status, createdDate | Long/Money/Enum | status = PENDING/VERIFIED/FUNDING/FUNDED/DISBURSED/CANCELLED/EXPIRED_FUNDING |
+| **LoanApplication** | id, borrowerId, amount, tenor, creditScore, status, createdDate, minInvestedPercentageReached, cancelledDate | Long/Money/Enum/boolean/LocalDateTime | status = PENDING/VERIFIED/FUNDING/FUNDED/DISBURSED/CANCELLED/EXPIRED_FUNDING; minInvestedPercentageReached tracks if 20%+ invested |
 | **KTP** | nomorKTP, nama, tanggalLahir | String/LocalDate | Format: 16 digit, non-null checks |
 | **Investment** | id, lenderId, loanId, amount, status | Long/Money/Enum | status = ACTIVE/CANCELLED |
 | **Payment** | id, loanId, noBulan, amount, dueDate, status | Long/Money/LocalDate | status = PENDING/PAID |
@@ -290,7 +296,7 @@ Shared Domain (3 files):
 **Durasi:** Hari 2-3 (depends on Iman)  
 **Branch:** `feature/domain-aggregates-services`  
 **Dependency:** ⬅️ WAIT FOR `feature/domain-entities` (from Iman)  
-**Output:** 7 Java files  
+**Output:** 8 Java files (+1 LoanCancellationService)  
 **Unblocks:** ➜ ENABLES Danang (feature/application-layer)
 
 **Deliverables:**
@@ -298,24 +304,25 @@ Shared Domain (3 files):
 Borrower Aggregates (1 file):
 1. `domain/borrower/aggregate/LoanAggregate.java` (Aggregate Root with State Pattern)
 
-Borrower Services (2 files):
+Borrower Services (3 files):
 2. `domain/borrower/service/LoanApprovalService.java` (verifyCreditScore, calculateLoanLimit, verifyKTP)
 3. `domain/borrower/service/PaymentScheduleService.java` (Strategy Pattern for interest calculation)
+4. `domain/borrower/service/LoanCancellationService.java` (NEW - handle cancellation logic, refund logic, counter increment, block period check)
 
 Lender Aggregates (1 file):
-4. `domain/lender/aggregate/LenderAggregate.java`
+5. `domain/lender/aggregate/LenderAggregate.java`
 
 Lender Services (1 file):
-5. `domain/lender/service/InvestmentService.java` (validateMinimumInvestment)
+6. `domain/lender/service/InvestmentService.java` (validateMinimumInvestment)
 
 Shared Domain (2 files):
-6. `domain/shared/DomainEventPublisher.java` (Observer Pattern - pub-sub)
-7. `domain/shared/LoanStatus.java` (extended with state transition validation)
+7. `domain/shared/DomainEventPublisher.java` (Observer Pattern - pub-sub)
+8. `domain/shared/LoanStatus.java` (extended with state transition validation)
 
 **TDD Checklist:**
 - [ ] Hari 2 Pagi: `LoanStatusTest.java` → impl (state transition validation: PENDING→VERIFIED→FUNDING→FUNDED→DISBURSED, CANCELLED, EXPIRED_FUNDING)
 - [ ] Hari 2 Pagi: `LoanApprovalServiceTest.java` → impl
-- [ ] Hari 2 Sore: `PaymentScheduleServiceTest.java`, `InvestmentServiceTest.java` → impl
+- [ ] Hari 2 Sore: `PaymentScheduleServiceTest.java`, `InvestmentServiceTest.java`, `LoanCancellationServiceTest.java` → impl
 - [ ] Hari 3 Pagi: `LoanAggregateTest.java`, `LenderAggregateTest.java` → impl
 - [ ] Hari 3 Sore: `DomainEventPublisherTest.java` → impl
 - [ ] Push ke branch
@@ -327,38 +334,40 @@ Shared Domain (2 files):
 **Durasi:** Hari 3-4 (depends on Kemal)  
 **Branch:** `feature/application-layer`  
 **Dependency:** ⬅️ WAIT FOR `feature/domain-aggregates-services` (from Kemal)  
-**Output:** 11 Java files + Mockito-heavy testing  
+**Output:** 12 Java files + Mockito-heavy testing (+1 CancelLoanUseCase)  
 **Unblocks:** ➜ ENABLES Jaya (feature/infrastructure-layer)
 
 **Deliverables:**
 
-Borrower Use Cases (4 files):
+Borrower Use Cases (5 files):
 1. `application/borrower/usecase/RegisterBorrowerUseCase.java`
-2. `application/borrower/usecase/ApplyLoanUseCase.java`
-3. `application/borrower/usecase/GetLoanDetailsUseCase.java`
-4. `application/borrower/usecase/GetLoanListUseCase.java`
+2. `application/borrower/usecase/ApplyLoanUseCase.java` (check: borrower blocked? lastBlockedDate + 4 bulan)
+3. `application/borrower/usecase/CancelLoanUseCase.java` (NEW - validate state, check 20% invested, refund, increment counter)
+4. `application/borrower/usecase/GetLoanDetailsUseCase.java`
+5. `application/borrower/usecase/GetLoanListUseCase.java` (display cancellationCount di borrower info)
 
-Borrower DTO & Service (5 files):
-5. `application/borrower/service/BorrowerApplicationService.java` (orchestrator)
-6. `application/borrower/dto/RegisterBorrowerCommand.java`
-7. `application/borrower/dto/ApplyLoanCommand.java`
-8. `application/borrower/dto/LoanDTO.java`
-9. `application/borrower/dto/BorrowerDTO.java`
+Borrower DTO & Service (6 files):
+6. `application/borrower/service/BorrowerApplicationService.java` (orchestrator)
+7. `application/borrower/dto/RegisterBorrowerCommand.java`
+8. `application/borrower/dto/ApplyLoanCommand.java`
+9. `application/borrower/dto/CancelLoanCommand.java` (NEW - loanId, borrowerId, reason)
+10. `application/borrower/dto/LoanDTO.java`
+11. `application/borrower/dto/BorrowerDTO.java` (include cancellationCount)
 
 Lender Use Cases & DTOs (4 files):
-10. `application/lender/usecase/RegisterLenderUseCase.java`
-11. `application/lender/usecase/TopUpSaldoUseCase.java` (kalkulasi 2% admin fee)
-12. `application/lender/usecase/InvestLoanUseCase.java` (Complex: state transition + event)
-13. `application/lender/usecase/GetAvailableLoansUseCase.java`
+12. `application/lender/usecase/RegisterLenderUseCase.java`
+13. `application/lender/usecase/TopUpSaldoUseCase.java` (kalkulasi 2% admin fee)
+14. `application/lender/usecase/InvestLoanUseCase.java` (Complex: state transition + event)
+15. `application/lender/usecase/GetAvailableLoansUseCase.java` (display borrower cancellationCount)
 
 Shared Layer (1 file):
-14. `application/shared/ApproveLoanUseCase.java` (crosses Borrower & Lender context)
+16. `application/shared/ApproveLoanUseCase.java` (crosses Borrower & Lender context)
 
 **Key:** Every test must mock Repository with @Mock/@InjectMocks!
 
 **TDD Checklist:**
 - [ ] Hari 3 Pagi: `RegisterBorrowerUseCaseTest.java` (mock repo) → impl
-- [ ] Hari 3 Sore: `ApplyLoanUseCaseTest.java` → impl
+- [ ] Hari 3 Sore: `ApplyLoanUseCaseTest.java` (check block period), `CancelLoanUseCaseTest.java` (check refund logic) → impl
 - [ ] Hari 4 Pagi: Lender use cases → impl
 - [ ] Hari 4 Sore: `InvestLoanUseCaseTest.java` (complex mocking) → impl
 - [ ] Push ke branch
@@ -415,11 +424,16 @@ Integration Tests (1 file):
 2. Apply loan 30M, tenor 12
 3. System verifies (credit score check)
 4. Loan: PENDING → VERIFIED → FUNDING
-5. Lender "Budi" register & top up 20M
-6. Budi invest 6M (20% min)
-7. Check full funding: total invested ≥ 30M?
-8. Status: FUNDED → DISBURSED
-9. Verify payment schedule: 12 monthly payments
+5. Lender "Budi" register & top up 20M (bayar 2% = 400K, saldo = 19.6M)
+6. Budi invest 6M (20% min) → loan now 20% funded
+7. **CANCEL TEST:** Sman cancel loan → Budi refund 6M → saldo = 25.6M (19.6 + 6)
+8. Verify: Sman.cancellationCount = 1
+9. Verify: loan status = CANCELLED
+10. Lender "Citra" register & top up 20M
+11. Citra invest 6M (new loan attempt)
+12. Full funding: total ≥ 30M?
+13. Status: FUNDED → DISBURSED
+14. Verify payment schedule: 12 monthly payments
 
 **TDD Checklist:**
 - [ ] Hari 5 Pagi: Merge all feature branches ke develop
@@ -549,7 +563,8 @@ Setiap hari 15 menit:
 
 | Fee Type | Value | Actor | When | Notes |
 |----------|-------|-------|------|-------|
-| **Admin Fee** | 2% | Lender | Top Up Saldo | Dipotong dari amount yang di-top up |
+| **Admin Fee** | 2% | Lender | Top Up Saldo | Dipotong dari amount yang di-top up, NOT refunded saat cancel |
+| **Cancellation Penalty** | - | Borrower | After 3x cancel with ≥20% funded | 4 bulan block period dari apply baru |
 | **Borrower Fee** | - | Borrower | - | TBD (belum dalam scope) |
 
 **Contoh:**
@@ -559,7 +574,67 @@ Setiap hari 15 menit:
 
 ---
 
-## 8. Peringatan Kritis
+## 9. Loan Cancellation Feature
+
+### **Business Rules:**
+
+1. **Cancellable States:**
+   - PENDING, VERIFIED, FUNDING (dapat dibatalkan)
+   - FUNDED, DISBURSED (TIDAK dapat dibatalkan)
+
+2. **Cancellation Count Trigger:**
+   - Hanya dihitung jika investasi sudah ≥20% dari loan amount
+   - Di bawah 20% = tidak increment counter
+
+3. **Counter Limit & Blocking:**
+   - Cancel 1x = normal
+   - Cancel 2x = warning (display di borrower profile)
+   - Cancel 3x = **BLOCKED 4 bulan** dari apply baru
+   - Block period: `lastBlockedDate + 4 months`
+
+4. **Refund Mechanism:**
+   - Get semua investment untuk loan ini
+   - Refund FULL amount ke setiap lender
+   - Admin fee 2% sudah diambil saat top up (tidak dikembalikan)
+   - Update investment.status = CANCELLED
+   - Update loan.status = CANCELLED
+
+5. **Display in CLI:**
+   - Loan list: tampilkan `cancellationCount` di borrower info
+   - Example: "Borrower: Sman (Cancelled 2x)"
+   - Prevent apply jika dalam block period
+
+### **Example Scenario:**
+
+```
+Transaction 1:
+- Borrower Sman apply 30M
+- Lender Budi invest 6M (20%)
+- Sman CANCEL → Budi refund 6M
+- Sman.cancellationCount = 1
+
+Transaction 2:
+- Sman apply 30M again
+- Lender Citra invest 8M (26%)
+- Sman CANCEL → Citra refund 8M
+- Sman.cancellationCount = 2
+
+Transaction 3:
+- Sman apply 30M again
+- Lender Dina invest 10M (33%)
+- Sman CANCEL → Dina refund 10M
+- Sman.cancellationCount = 3
+- Sman.lastBlockedDate = NOW
+- Next apply attempt blocked untuk 4 bulan
+```
+
+### **Events:**
+
+- `LoanCancelledEvent`: loanId, borrowerId, cancelledDate, totalRefunded, affectedLenders
+
+---
+
+## 10. Peringatan Kritis
 
 ### JANGAN LUPAKAN:
 
@@ -597,7 +672,7 @@ Setiap hari 15 menit:
 
 ---
 
-## 10. Deliverable Akhir (Hari 7 EOD)
+## 12. Deliverable Akhir (Hari 7 EOD)
 
 **Folder Structure:**
 - ✓ `domain/` (entities, aggregates, services, repositories interface, events)
@@ -622,7 +697,7 @@ Setiap hari 15 menit:
 
 ---
 
-## 9. Backup: Hubungi Dosen
+## 11. Backup: Hubungi Dosen
 
 Jika ada blocker:
 - **Architectural block:** Konsultasi dosen → Kemal/Rafi coordinate
@@ -631,7 +706,7 @@ Jika ada blocker:
 
 ---
 
-## Key Success Factors
+## 13. Key Success Factors
 
 1. **Parallelism** → 5 orang bekerja 5 task berbeda → selesai dalam 1 minggu
 2. **Clear dependency** → Layer per layer, interface-first design
