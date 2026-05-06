@@ -1,737 +1,355 @@
 # 📋 P2P Lending Platform - Masterplan
-**Sprint 1 Minggu | Tim 5 Orang | Java + DDD + TDD**
+**Sprint 1 Minggu | Tim 5 Orang | Java 11+ | Maven | DDD + TDD**
 
 ---
 
-## 1. Scope & Tech Stack
+## 1. Features
 
-### 1.1 Fitur yang Dikembangkan
+### Borrower
+- Register (credit score self-declare: 1-1000, min 600)
+- Apply loan (tenor: 1/3/6/12 months)
+- Loan limit = 3x salary
+- Cancel loan (if ≥20% invested → counter +1)
+- Block 4 bulan after 3x cancel
 
-#### Borrower (Peminjam)
-- Pendaftaran Borrower (nama, no telepon, alamat, KTP, selfie, gaji, pekerjaan, riwayat pinjaman, **credit score self-declare**)
-- Pengajuan Loan (PENDING → VERIFIED)
-- Verifikasi Data KTP (strict check, nama & umur harus sesuai)
-- Verifikasi Credit Score (min 600, self-declared by borrower)
-- Pemberian Loan Limit
-- Masuk List Loan (deadline 5 hari funding, status EXPIRED jika > 5 hari)
-- Pencairan Dana (jika fully funded)
-- Bisa cancel aplikasi (status CANCELLED) - jika sudah ada investasi ≥20%, increment cancellation counter
-- Block periode 4 bulan setelah cancel ke-3x
+### Lender
+- Register + initial balance
+- Top up (2% admin fee deducted)
+- Invest (min 20% of loan)
+- Get refund when cancellation
 
-#### Lender (Pemberi Pinjaman)
-- Pendaftaran Lender (nama, no telepon, alamat, KTP, selfie, pekerjaan, saldo awal)
-- Top Up Saldo (dengan admin fee 2%)
-- Pilih Loan dari List
-- Investasi Minimum 20% dari Loan Amount
-- Notifikasi saat fully funded
-- Bisa cancel investasi sebelum fully funded
+### Business Rules
+- Loan amount ≤ 3x salary
+- Credit score ≥ 600
+- Min investment 20%
+- Funding deadline 5 hari
+- 2% admin fee (not returned on cancel)
+- Refund full amount to lenders on cancel
+- States: PENDING→VERIFIED→FUNDING→FUNDED→DISBURSED + CANCELLED + EXPIRED_FUNDING
 
-#### Core Logic
-- Validasi Limit Peminjaman (3x gaji)
-- Verifikasi Credit Score (min 600, self-declared input dari borrower)
-- Perhitungan Cicilan Bulanan
-- State Transition: PENDING → VERIFIED → FUNDING → FUNDED → DISBURSED
-- State khusus: CANCELLED (borrower/lender cancel), EXPIRED_FUNDING (waiting > 5 hari tanpa full funding)
-- Automatic Approval jika fully funded
-- Payment Schedule Generation
-- **Admin Fee:** 2% untuk lender saat top up saldo (tidak dikembalikan saat cancel)
-- **Cancellation Rules:**
-  - Hanya bisa cancel saat state: PENDING, VERIFIED, FUNDING (NOT FUNDED/DISBURSED)
-  - Hanya dihitung sebagai "cancel" jika investasi sudah ≥20% dari loan amount
-  - Setelah cancel 3x (dengan investasi ≥20%): borrower diblok 4 bulan dari apply baru
-  - Refund: kembalikan full amount ke semua lender (admin fee 2% sudah diambil saat top up)
+---
 
-### 1.2 Tech Stack
+## 2. Tech Stack
 
 | Item | Detail |
 |------|--------|
-| **Language** | Java 11+ |
-| **Build** | Maven |
-| **Testing** | JUnit 5, Mockito 4+ |
-| **Architecture** | DDD (Domain-Driven Design) |
-| **Data Storage** | In-Memory HashMap (Transient) |
-| **Design Patterns** | 5 GoF Design Patterns |
-| **Version Control** | Git (per feature branch) |
-
-### 1.3 Prinsip TDD
-
-Setiap fitur mengikuti siklus:
-1. **RED** → Tulis test, lihat GAGAL
-2. **GREEN** → Tulis code minimal agar test PASS
-3. **REFACTOR** → Improve struktur, maintain GREEN
+| Language | Java 11+ |
+| Build | Maven |
+| Testing | JUnit 5 + Mockito 4+ |
+| Architecture | DDD (4 layers) |
+| Storage | In-Memory HashMap |
+| Design Patterns | 5 GoF |
 
 ---
 
-## 2. Struktur Direktori DDD
+## 3. 5 GoF Patterns
+
+| Pattern | File | Purpose |
+|---------|------|---------|
+| **State** | LoanStatus + LoanAggregate | Manage state transitions |
+| **Factory** | LoanAggregate.create() | Encapsulate creation + validation |
+| **Strategy** | PaymentScheduleService | Extensible interest calculation |
+| **Observer** | DomainEventPublisher + SimpleEventBus | Decouple events |
+| **Repository** | *Repository interfaces | Abstract data access |
+
+---
+
+## 4. DDD Structure
 
 ```
-pinjamanjavva/
-├── pom.xml
-├── src/main/java/com/p2plending/
-│   ├── domain/                      # Business Logic Layer
-│   │   ├── borrower/
-│   │   │   ├── entity/
-│   │   │   │   ├── Borrower.java
-│   │   │   │   ├── LoanApplication.java
-│   │   │   │   ├── KTP.java
-│   │   │   │   └── Payment.java
-│   │   │   ├── aggregate/
-│   │   │   │   └── LoanAggregate.java
-│   │   │   ├── service/
-│   │   │   │   ├── LoanApprovalService.java
-│   │   │   │   └── PaymentScheduleService.java
-│   │   │   ├── repository/
-│   │   │   │   └── BorrowerRepository.java (Interface)
-│   │   │   └── event/
-│   │   │       └── LoanEvent.java
-│   │   │
-│   │   ├── lender/
-│   │   │   ├── entity/
-│   │   │   │   ├── Lender.java
-│   │   │   │   └── Investment.java
-│   │   │   ├── aggregate/
-│   │   │   │   └── LenderAggregate.java
-│   │   │   ├── service/
-│   │   │   │   └── InvestmentService.java
-│   │   │   ├── repository/
-│   │   │   │   └── LenderRepository.java (Interface)
-│   │   │   └── event/
-│   │   │       └── InvestmentEvent.java
-│   │   │
-│   │   └── shared/
-│   │       ├── Money.java
-│   │       ├── LoanStatus.java
-│   │       ├── Tenor.java
-│   │       └── DomainEventPublisher.java
-│   │
-│   ├── application/                 # Use Cases & Workflows
-│   │   ├── borrower/
-│   │   │   ├── usecase/
-│   │   │   │   ├── RegisterBorrowerUseCase.java
-│   │   │   │   ├── ApplyLoanUseCase.java
-│   │   │   │   ├── GetLoanDetailsUseCase.java
-│   │   │   │   └── GetLoanListUseCase.java
-│   │   │   ├── service/
-│   │   │   │   └── BorrowerApplicationService.java
-│   │   │   └── dto/
-│   │   │       ├── RegisterBorrowerCommand.java
-│   │   │       ├── ApplyLoanCommand.java
-│   │   │       ├── LoanDTO.java
-│   │   │       └── BorrowerDTO.java
-│   │   │
-│   │   ├── lender/
-│   │   │   ├── usecase/
-│   │   │   │   ├── RegisterLenderUseCase.java
-│   │   │   │   ├── TopUpSaldoUseCase.java
-│   │   │   │   ├── InvestLoanUseCase.java
-│   │   │   │   └── GetAvailableLoansUseCase.java
-│   │   │   ├── service/
-│   │   │   │   └── LenderApplicationService.java
-│   │   │   └── dto/
-│   │   │       ├── RegisterLenderCommand.java
-│   │   │       ├── InvestCommand.java
-│   │   │       ├── LenderDTO.java
-│   │   │       └── AvailableLoanDTO.java
-│   │   │
-│   │   └── shared/
-│   │       └── ApproveLoanUseCase.java
-│   │
-│   ├── infrastructure/              # Technical Implementation
-│   │   ├── persistence/
-│   │   │   ├── SharedStorage.java (Singleton)
-│   │   │   ├── InMemoryBorrowerRepository.java
-│   │   │   ├── InMemoryLenderRepository.java
-│   │   │   ├── InMemoryLoanRepository.java
-│   │   │   └── InMemoryInvestmentRepository.java
-│   │   │
-│   │   └── event/
-│   │       └── SimpleEventBus.java
-│   │
-│   └── interfaces/                  # Entry Points
-│       └── cli/
-│           └── LendingApp.java
-│
-└── src/test/java/com/p2plending/
-    ├── domain/
-    │   ├── borrower/
-    │   │   ├── entity/ (Test files for entities)
-    │   │   ├── service/ (Test files for services)
-    │   │   └── aggregate/ (Test files for aggregates)
-    │   │
-    │   ├── lender/
-    │   │   ├── entity/ (Test files for entities)
-    │   │   ├── service/ (Test files for services)
-    │   │   └── aggregate/ (Test files for aggregates)
-    │   │
-    │   └── shared/
-    │       └── (Test files for shared classes)
-    │
-    └── application/
-        ├── borrower/
-        │   └── (Test files for use cases)
-        ├── lender/
-        │   └── (Test files for use cases)
-        └── shared/
-            └── (Test files for cross-context use cases)
+src/main/java/com/p2plending/
+├── domain/
+│   ├── borrower/ (entity, aggregate, service, repository interface)
+│   ├── lender/ (entity, aggregate, service, repository interface)
+│   └── shared/ (Money, LoanStatus, Tenor, DomainEventPublisher)
+├── application/
+│   ├── borrower/ (use cases, DTOs)
+│   ├── lender/ (use cases, DTOs)
+│   └── shared/
+├── infrastructure/
+│   ├── persistence/ (repositories implementation, SharedStorage)
+│   └── event/ (SimpleEventBus)
+└── interfaces/
+    └── cli/ (LendingApp.java)
+
+src/test/java/com/p2plending/
+├── domain/ (unit tests for entities, aggregates, services)
+└── application/ (unit tests for use cases with Mockito mocks)
 ```
 
 ---
 
-## 3. 5 GoF Design Patterns
+## 5. Team Tasks
 
-| Pattern | File | Tujuan |
-|---------|------|--------|
-| **State** | `LoanStatus.java` + `LoanAggregate.java` | Mengelola state transition loan (PENDING → VERIFIED → FUNDING → FUNDED → DISBURSED, plus CANCELLED & EXPIRED_FUNDING) |
-| **Strategy** | `PaymentScheduleService.java` | Perhitungan cicilan dengan interface yang extensible |
-| **Observer** | `DomainEventPublisher.java` + `SimpleEventBus.java` | Decoupling domain events (LoanApproved, FundingCompleted) |
-| **Factory** | `LoanAggregate.create()` | Pembuatan Loan dengan validasi bisnis terpadu |
-| **Repository** | `*Repository.java` interfaces | Abstraksi data access untuk testing & decoupling (HashMap only, tidak akan ganti ke DB) |
+| Person | Hari | Files | Layer | Depend |
+|--------|------|-------|-------|--------|
+| **IMAN** | 1-2 | 9 | Domain Entities | None |
+| **KEMAL** | 2-3 | 8 | Domain Services/Agg | ← Iman |
+| **DANANG** | 3-4 | 12 | Application | ← Kemal |
+| **JAYA** | 4-5 | 6 | Infrastructure | ← Danang |
+| **RAFI** | 5-7 | 2 | Interfaces + E2E | ← Jaya |
 
-**Penjelasan Implementasi:**
-- **State:** Enum `LoanStatus` dengan values: PENDING, VERIFIED, FUNDING, FUNDED, DISBURSED, CANCELLED, EXPIRED_FUNDING
-  - Valid transitions:
-    - PENDING → VERIFIED (after KTP verification)
-    - VERIFIED → FUNDING (entering funding period)
-    - FUNDING → FUNDED (when fully invested ≥ loan amount)
-    - FUNDING → EXPIRED_FUNDING (if > 5 days waiting)
-    - FUNDED → DISBURSED (when all conditions met)
-    - Any state → CANCELLED (if borrower/lender cancels)
-  - Method: `canTransitionTo(nextStatus)` validates allowed transitions
-- **Strategy:** Interface `InterestCalculationStrategy` dengan implementasi `FixedInterestCalculation`
-- **Observer:** `DomainEventPublisher` publish, `SimpleEventBus` subscribe & notify
-- **Factory:** Static method `create()` dengan validasi bisnis encapsulated
-- **Repository:** Interface di domain untuk Mockito testing, implementasi HashMap di infrastructure (final, tidak ada DB migration)
+**Total: 37 Java files | Execution: Sequential pipeline**
 
 ---
 
-## 4. Pembagian Tugas & Timeline
+## 6. IMAN: Domain Entities (Hari 1-2)
 
-### � Quick Reference untuk AI & Team
+**9 Files:**
 
-#### Dependency Chain (Urutan Eksekusi)
-```
-IMAN (Hari 1-2)
-  ├─ 9 Files (Entities + VO)
-  └─ ✅ Push: feature/domain-entities
-      │
-      └──→ KEMAL (Hari 2-3) ⏳ WAITS FOR
-           ├─ 7 Files (Aggregates + Services)
-           └─ ✅ Push: feature/domain-aggregates-services
-               │
-               └──→ DANANG (Hari 3-4) ⏳ WAITS FOR
-                    ├─ 11 Files (Use Cases + DTOs)
-                    └─ ✅ Push: feature/application-layer
-                        │
-                        └──→ JAYA (Hari 4-5) ⏳ WAITS FOR
-                             ├─ 6 Files (Repositories + EventBus)
-                             └─ ✅ Push: feature/infrastructure-layer
-                                 │
-                                 └──→ RAFI (Hari 5-7) ⏳ WAITS FOR
-                                      ├─ 2 Files (CLI + Integration Tests)
-                                      └─ ✅ Push: feature/presentation-integration
-```
+Borrower (4):
+- Borrower.java
+- LoanApplication.java
+- KTP.java (immutable, 16-digit format)
+- Payment.java
 
-#### Quick Overview Table
+Lender (2):
+- Lender.java
+- Investment.java
 
-| Person | Periode | Files | Layer | Dependencies | Branch |
-|--------|---------|-------|-------|--------------|--------|
-| **IMAN** | Hari 1-2 | 9 | Domain (Entities) | None | `feature/domain-entities` |
-| **KEMAL** | Hari 2-3 | 7 | Domain (Agg+Svc) | ← Iman | `feature/domain-aggregates-services` |
-| **DANANG** | Hari 3-4 | 11 | Application | ← Kemal | `feature/application-layer` |
-| **JAYA** | Hari 4-5 | 6 | Infrastructure | ← Danang | `feature/infrastructure-layer` |
-| **RAFI** | Hari 5-7 | 2 | Interfaces+Tests | ← Jaya | `feature/presentation-integration` |
+Shared (3):
+- Money.java (BigDecimal-based, immutable)
+- Tenor.java (enum: 1,3,6,12)
+- LoanStatus.java (enum: 7 states)
 
-**Total: 37 Java files + Full test coverage** (+2 files for cancellation feature)
-
----
-
-### �👤 IMAN: Domain Layer - Entities & Value Objects
-
-**Durasi:** Hari 1-2  
-**Branch:** `feature/domain-entities`  
-**Output:** 9 Java files  
-**Unblocks:** ➜ ENABLES Kemal (feature/domain-aggregates-services)
-
-**Deliverables:**
-
-Borrower Domain (4 files):
-1. `domain/borrower/entity/Borrower.java`
-2. `domain/borrower/entity/LoanApplication.java`
-3. `domain/borrower/entity/KTP.java` (Value Object - immutable)
-4. `domain/borrower/entity/Payment.java` (Value Object)
-
-Lender Domain (2 files):
-5. `domain/lender/entity/Lender.java`
-6. `domain/lender/entity/Investment.java`
-
-Shared Domain (3 files):
-7. `domain/shared/Money.java`
-8. `domain/shared/Tenor.java`
-9. `domain/shared/LoanStatus.java` (Enum)
-
-**Field Specification:**
-
-| Entity | Fields | Type | Notes |
-|--------|--------|------|-------|
-| **Borrower** | id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, riwayatPinjaman, creditScore, cancellationCount, lastBlockedDate | String/Money/Integer/LocalDateTime | creditScore: self-declared by borrower (1-1000); cancellationCount incremented when cancel ≥20% funded |
-| **Lender** | id, nama, noTelepon, alamat, ktp, selfie, pekerjaan, saldo | String/Money | Saldo mutable (topUp) |
-| **LoanApplication** | id, borrowerId, amount, tenor, creditScore, status, createdDate, minInvestedPercentageReached, cancelledDate | Long/Money/Enum/boolean/LocalDateTime | status = PENDING/VERIFIED/FUNDING/FUNDED/DISBURSED/CANCELLED/EXPIRED_FUNDING; minInvestedPercentageReached tracks if 20%+ invested |
-| **KTP** | nomorKTP, nama, tanggalLahir | String/LocalDate | Format: 16 digit, non-null checks |
-| **Investment** | id, lenderId, loanId, amount, status | Long/Money/Enum | status = ACTIVE/CANCELLED |
-| **Payment** | id, loanId, noBulan, amount, dueDate, status | Long/Money/LocalDate | status = PENDING/PAID |
-| **Money** | amount, currency | BigDecimal/String | Immutable VO with equals/hashCode |
-| **Tenor** | months | Integer | Valid: 1, 3, 6, 12 |
-| **LoanStatus** | Values | Enum | PENDING, VERIFIED, FUNDING, FUNDED, DISBURSED, CANCELLED, EXPIRED_FUNDING |
+**Key Fields:**
+- Borrower: id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, creditScore, cancellationCount, lastBlockedDate
+- LoanApplication: id, borrowerId, amount, tenor, status, createdDate, minInvestedPercentageReached, cancelledDate
+- Investment: id, lenderId, loanId, amount, status
 
 **TDD Checklist:**
-- [ ] Hari 1 Pagi: `KTPTest.java` → `KTP.java` (immutability, equals, 16-digit format check)
-- [ ] Hari 1 Sore: `MoneyTest.java`, `TenorTest.java` → implementasi (equals/hashCode, validation)
-- [ ] Hari 2 Pagi: `BorrowerTest.java`, `LenderTest.java` → implementasi (fields sesuai table)
-- [ ] Hari 2 Sore: `LoanApplicationTest.java`, `InvestmentTest.java`, `PaymentTest.java`, `LoanStatusTest.java`
-- [ ] Push ke branch
+- [ ] Start with KTP (immutable, format validation)
+- [ ] Money & Tenor (VO with equals/hashCode)
+- [ ] Borrower, Lender entities
+- [ ] LoanApplication, Investment, Payment
+- [ ] LoanStatus enum
+- [ ] Push: feature/domain-entities
 
 ---
 
-### 👤 KEMAL: Domain Layer - Aggregates & Domain Services
+## 7. KEMAL: Domain Services/Aggregates (Hari 2-3)
 
-**Durasi:** Hari 2-3 (depends on Iman)  
-**Branch:** `feature/domain-aggregates-services`  
-**Dependency:** ⬅️ WAIT FOR `feature/domain-entities` (from Iman)  
-**Output:** 8 Java files (+1 LoanCancellationService)  
-**Unblocks:** ➜ ENABLES Danang (feature/application-layer)
+**8 Files:**
 
-**Deliverables:**
+Borrower (4):
+- LoanAggregate.java (ROOT - STATE + FACTORY)
+- LoanApprovalService.java (verify score, calc limit)
+- PaymentScheduleService.java (STRATEGY)
+- LoanCancellationService.java (cancel, refund, counter, block)
 
-Borrower Aggregates (1 file):
-1. `domain/borrower/aggregate/LoanAggregate.java` (Aggregate Root with State Pattern)
+Lender (2):
+- LenderAggregate.java (ROOT)
+- InvestmentService.java (validate min 20%)
 
-Borrower Services (3 files):
-2. `domain/borrower/service/LoanApprovalService.java` (verifyCreditScore: score>=600?, calculateLoanLimit: salary*3, verifyKTP)
-3. `domain/borrower/service/PaymentScheduleService.java` (Strategy Pattern for interest calculation)
-4. `domain/borrower/service/LoanCancellationService.java` (NEW - handle cancellation logic, refund logic, counter increment, block period check)
+Shared (2):
+- DomainEventPublisher.java (OBSERVER interface)
+- LoanStatus.java (canTransitionTo validation)
 
-Lender Aggregates (1 file):
-5. `domain/lender/aggregate/LenderAggregate.java`
+**Key Methods:**
+- LoanAggregate.create(): Validate & init loan
+- LoanApprovalService: verifyCreditScore, calculateLoanLimit, verifyKTP
+- LoanCancellationService: cancelLoan, isBlockedFromApplying, refundInvestment
+- InvestmentService: validateMinimumInvestment
 
-Lender Services (1 file):
-6. `domain/lender/service/InvestmentService.java` (validateMinimumInvestment)
-
-Shared Domain (2 files):
-7. `domain/shared/DomainEventPublisher.java` (Observer Pattern - pub-sub)
-8. `domain/shared/LoanStatus.java` (extended with state transition validation)
+**Understand:**
+- **Aggregate Root:** LoanAggregate manages internal entities (Investment, Payment)
+- **Service:** Stateless operations across aggregates
+- **State Pattern:** LoanStatus enum with valid transitions
 
 **TDD Checklist:**
-- [ ] Hari 2 Pagi: `LoanStatusTest.java` → impl (state transition validation: PENDING→VERIFIED→FUNDING→FUNDED→DISBURSED, CANCELLED, EXPIRED_FUNDING)
-- [ ] Hari 2 Pagi: `LoanApprovalServiceTest.java` → impl
-- [ ] Hari 2 Sore: `PaymentScheduleServiceTest.java`, `InvestmentServiceTest.java`, `LoanCancellationServiceTest.java` → impl
-- [ ] Hari 3 Pagi: `LoanAggregateTest.java`, `LenderAggregateTest.java` → impl
-- [ ] Hari 3 Sore: `DomainEventPublisherTest.java` → impl
-- [ ] Push ke branch
+- [ ] LoanStatus transitions validation
+- [ ] LoanApprovalService (score ≥600, limit calc)
+- [ ] PaymentScheduleService (interest calc)
+- [ ] LoanCancellationService (refund logic)
+- [ ] LoanAggregate & LenderAggregate
+- [ ] DomainEventPublisher interface
+- [ ] Push: feature/domain-aggregates-services
 
 ---
 
-### 👤 DANANG: Application Layer - Use Cases & DTOs
+## 8. DANANG: Application Layer (Hari 3-4)
 
-**Durasi:** Hari 3-4 (depends on Kemal)  
-**Branch:** `feature/application-layer`  
-**Dependency:** ⬅️ WAIT FOR `feature/domain-aggregates-services` (from Kemal)  
-**Output:** 12 Java files + Mockito-heavy testing (+1 CancelLoanUseCase)  
-**Unblocks:** ➜ ENABLES Jaya (feature/infrastructure-layer)
+**12 Files + Mockito:**
 
-**Deliverables:**
+Borrower (5 use cases + 6 DTOs):
+- RegisterBorrowerUseCase + Command/DTO
+- ApplyLoanUseCase + Command/DTO (check block period)
+- CancelLoanUseCase + Command (NEW)
+- GetLoanDetailsUseCase
+- GetLoanListUseCase (display cancellationCount)
 
-Borrower Use Cases (5 files):
-1. `application/borrower/usecase/RegisterBorrowerUseCase.java`
-2. `application/borrower/usecase/ApplyLoanUseCase.java` (check: borrower blocked? lastBlockedDate + 4 bulan)
-3. `application/borrower/usecase/CancelLoanUseCase.java` (NEW - validate state, check 20% invested, refund, increment counter)
-4. `application/borrower/usecase/GetLoanDetailsUseCase.java`
-5. `application/borrower/usecase/GetLoanListUseCase.java` (display cancellationCount di borrower info)
+Lender (4 use cases + DTOs):
+- RegisterLenderUseCase + Command/DTO
+- TopUpSaldoUseCase (calc 2% fee)
+- InvestLoanUseCase (complex: state + event)
+- GetAvailableLoansUseCase
 
-Borrower DTO & Service (6 files):
-6. `application/borrower/service/BorrowerApplicationService.java` (orchestrator)
-7. `application/borrower/dto/RegisterBorrowerCommand.java`
-8. `application/borrower/dto/ApplyLoanCommand.java`
-9. `application/borrower/dto/CancelLoanCommand.java` (NEW - loanId, borrowerId, reason)
-10. `application/borrower/dto/LoanDTO.java`
-11. `application/borrower/dto/BorrowerDTO.java` (include cancellationCount)
+Shared:
+- ApproveLoanUseCase
 
-Lender Use Cases & DTOs (4 files):
-12. `application/lender/usecase/RegisterLenderUseCase.java`
-13. `application/lender/usecase/TopUpSaldoUseCase.java` (kalkulasi 2% admin fee)
-14. `application/lender/usecase/InvestLoanUseCase.java` (Complex: state transition + event)
-15. `application/lender/usecase/GetAvailableLoansUseCase.java` (display borrower cancellationCount)
-
-Shared Layer (1 file):
-16. `application/shared/ApproveLoanUseCase.java` (crosses Borrower & Lender context)
-
-**Key:** Every test must mock Repository with @Mock/@InjectMocks!
+**Mockito Pattern:**
+- @Mock BorrowerRepository
+- @Mock LoanRepository
+- @InjectMocks ApplyLoanUseCase
+- when(repo.findById(...)).thenReturn(...)
+- verify(repo).save(any(...))
 
 **TDD Checklist:**
-- [ ] Hari 3 Pagi: `RegisterBorrowerUseCaseTest.java` (mock repo) → impl
-- [ ] Hari 3 Sore: `ApplyLoanUseCaseTest.java` (check block period), `CancelLoanUseCaseTest.java` (check refund logic) → impl
-- [ ] Hari 4 Pagi: Lender use cases → impl
-- [ ] Hari 4 Sore: `InvestLoanUseCaseTest.java` (complex mocking) → impl
-- [ ] Push ke branch
+- [ ] RegisterBorrowerUseCase (test + mock repo)
+- [ ] ApplyLoanUseCase (check block, mock repos)
+- [ ] CancelLoanUseCase (verify refund logic)
+- [ ] Lender use cases (TopUp, Invest)
+- [ ] Push: feature/application-layer
 
 ---
 
-### 👤 JAYA: Infrastructure Layer & Repositories
+## 9. JAYA: Infrastructure (Hari 4-5)
 
-**Durasi:** Hari 4-5 (depends on Danang)  
-**Branch:** `feature/infrastructure-layer`  
-**Dependency:** ⬅️ WAIT FOR `feature/application-layer` (from Danang)  
-**Output:** 6 Java files  
-**Unblocks:** ➜ ENABLES Rafi (feature/presentation-integration)
+**6 Files:**
 
-**Deliverables:**
+Repositories (5):
+- SharedStorage.java (Singleton HashMap)
+- InMemoryBorrowerRepository.java
+- InMemoryLoanRepository.java
+- InMemoryLenderRepository.java
+- InMemoryInvestmentRepository.java
 
-Persistence Layer (5 files):
-1. `infrastructure/persistence/SharedStorage.java` (Singleton - central HashMap store)
-2. `infrastructure/persistence/InMemoryBorrowerRepository.java` (implements BorrowerRepository)
-3. `infrastructure/persistence/InMemoryLoanRepository.java` (implements LoanRepository)
-4. `infrastructure/persistence/InMemoryLenderRepository.java` (implements LenderRepository)
-5. `infrastructure/persistence/InMemoryInvestmentRepository.java` (implements InvestmentRepository)
-
-Event Layer (1 file):
-6. `infrastructure/event/SimpleEventBus.java` (implements DomainEventPublisher with Observer pattern)
+Event:
+- SimpleEventBus.java (implements DomainEventPublisher)
 
 **TDD Checklist:**
-- [ ] Hari 4 Pagi: `InMemoryBorrowerRepositoryTest.java` → impl
-- [ ] Hari 4 Sore: Repository tests untuk Loan, Lender, Investment → impl
-- [ ] Hari 5 Pagi: `SimpleEventBusTest.java` → impl
-- [ ] Hari 5 Sore: Integration test (complete flow simulation)
-- [ ] Push ke branch
+- [ ] Repositories (CRUD operations, find by ID)
+- [ ] SimpleEventBus (subscribe, publish)
+- [ ] Integration test (complete flow)
+- [ ] Push: feature/infrastructure-layer
 
 ---
 
-### 👤 RAFI: Integration Testing & CLI
+## 10. RAFI: Interfaces + E2E (Hari 5-7)
 
-**Durasi:** Hari 5-7 (overlap + finalization)  
-**Branch:** `feature/presentation-integration`  
-**Dependency:** ⬅️ WAIT FOR `feature/infrastructure-layer` (from Jaya)  
-**Output:** 2 Java files (1 CLI + 1 Integration Test)  
-**Unblocks:** ➜ FINAL DELIVERY (merge ke main)
+**2 Files - Hardcoded Demo:**
 
-**Deliverables:**
+**LendingApp.java:**
+- Manual DI (no Spring)
+- 3 scenarios hardcoded:
+  1. Happy path: IMAN apply 30M → BUDI invest 6M
+  2. Cancellation: IMAN cancel → BUDI refund → counter = 1
+  3. Expired: KEMAL apply 15M → 6 days → EXPIRED_FUNDING
+- Console output with emoji + details
 
-Presentation Layer (1 file):
-1. `interfaces/cli/LendingApp.java` (Main entry point with 8-menu CLI + manual DI wiring)
-
-Integration Tests (1 file):
-2. `test/integration/EndToEndFlowTest.java` (Complete flow: register → apply → invest → disburse)
-
-**Scenario Test:**
-1. Borrower "Sman" register (salary 10M)
-2. Apply loan 30M, tenor 12
-3. System verifies (credit score check)
-4. Loan: PENDING → VERIFIED → FUNDING
-5. Lender "Budi" register & top up 20M (bayar 2% = 400K, saldo = 19.6M)
-6. Budi invest 6M (20% min) → loan now 20% funded
-7. **CANCEL TEST:** Sman cancel loan → Budi refund 6M → saldo = 25.6M (19.6 + 6)
-8. Verify: Sman.cancellationCount = 1
-9. Verify: loan status = CANCELLED
-10. Lender "Citra" register & top up 20M
-11. Citra invest 6M (new loan attempt)
-12. Full funding: total ≥ 30M?
-13. Status: FUNDED → DISBURSED
-14. Verify payment schedule: 12 monthly payments
+**EndToEndFlowTest.java:**
+- Test all 3 scenarios
+- No mocks (real repositories)
+- Verify: refund amount, counter increment, status transitions
 
 **TDD Checklist:**
-- [ ] Hari 5 Pagi: Merge all feature branches ke develop
-- [ ] Hari 5-6: `EndToEndFlowTest.java` (real repos, no mocks)
-- [ ] Hari 6-7: `LendingApp.java` + manual testing
-- [ ] Push ke branch
+- [ ] Write test cases (RED)
+- [ ] Hardcoded scenarios (GREEN)
+- [ ] Verify output format
+- [ ] All edge cases covered
+- [ ] Push: feature/presentation-integration
 
 ---
 
-## 5. Workflow Kolaborasi
+## 11. Git Strategy
 
-### 5.1 Git Strategy
-
-```bash
-# Main branches
-main                                # production-ready
-develop                             # integration branch
-
-# Feature branches (per person)
-feature/domain-entities             (Iman)
-feature/domain-aggregates-services  (Kemal)
-feature/application-layer           (Danang)
-feature/infrastructure-layer        (Jaya)
-feature/presentation-integration    (Rafi)
+```
+main (production)
+  ↑ merge Day 7
+develop (integration)
+  ↑ PR Day 5
+feature/domain-entities (Iman)
+feature/domain-aggregates-services (Kemal)
+feature/application-layer (Danang)
+feature/infrastructure-layer (Jaya)
+feature/presentation-integration (Rafi)
 ```
 
-**Workflow:**
-1. Setiap orang: `git checkout -b feature/xxx`
-2. Setiap hari: `git pull develop` & `git rebase` own branch
-3. Hari 5: Pull request ke develop (code review)
-4. Hari 7: Final merge develop → main
+---
 
-### 5.2 TDD Checklist
+## 12. TDD Workflow (Every File)
 
-- [ ] 1. Tulis test case (RED)
-- [ ] 2. Test gagal (verifikasi test valid)
-- [ ] 3. Implementasi minimal (GREEN)
-- [ ] 4. Test lulus 100%
-- [ ] 5. Refactor jika perlu
-- [ ] 6. Re-run test (GREEN tetap)
-- [ ] 7. Code review self
-- [ ] 8. Commit: `feat(domain): XYZ - test + impl`
+1. Write test (RED)
+2. Verify test fails
+3. Write code (GREEN)
+4. Test passes
+5. Refactor
+6. Commit: `feat(layer): desc - test + impl`
 
-### 5.3 Mockito Usage Pattern
+---
 
-```java
-@ExtendWith(MockitoExtension.class)
-class ApplyLoanUseCaseTest {
-    
-    @Mock
-    BorrowerRepository borrowerRepository;
-    
-    @Mock
-    LoanRepository loanRepository;
-    
-    @InjectMocks
-    ApplyLoanUseCase useCase;
-    
-    @Test
-    void shouldApplyLoanSuccessfully() {
-        // GIVEN
-        Borrower borrower = Borrower.create("sman", 10_000_000, ...);
-        when(borrowerRepository.findById("sman"))
-            .thenReturn(Optional.of(borrower));
-        
-        when(loanRepository.save(any(LoanApplication.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-        
-        // WHEN
-        ApplyLoanCommand cmd = new ApplyLoanCommand("sman", 30_000_000, 12);
-        LoanDTO result = useCase.execute(cmd);
-        
-        // THEN
-        assertThat(result.getStatus()).isEqualTo("VERIFIED");
-        verify(borrowerRepository).findById("sman");
-    }
-}
-```
+## 13. Definition of Done
 
-### 5.4 Daily Standup (09:00)
-
-Setiap hari 15 menit:
-- **Iman:** "Done X, Today Y, Blocked by Z?"
-- **Kemal:** "..."
-- *dst*
-
-**Focus Hari 3-4:** Review dependency antar layer untuk identify issue lebih cepat.
-
-### 5.5 Definition of Done
-
-**Per Task (daily):**
-- ✓ Code written
-- ✓ Unit test written & PASS (coverage > 80%)
-- ✓ Code reviewed (self or peer)
-- ✓ Mockito used for Repository (jika applicable)
-- ✓ Commit pushed ke feature branch
+**Daily:**
+- [ ] Code written + tested
+- [ ] Coverage >80%
+- [ ] Self-reviewed
+- [ ] Committed
 
 **Per Module:**
-- ✓ All tests PASS
-- ✓ No compilation error
-- ✓ Refactored
-- ✓ Merged ke develop
+- [ ] All tests PASS
+- [ ] No compilation errors
+- [ ] Merged to develop
 
-**Per Project (Day 7):**
-- ✓ All tests PASS (>85% coverage)
-- ✓ CLI app runnable
-- ✓ Integration test succeed
-- ✓ Documentation complete
-- ✓ Final merge develop → main
+**Final (Day 7):**
+- [ ] All tests PASS (>85% coverage)
+- [ ] CLI runnable
+- [ ] E2E test success
+- [ ] Git history clean
+- [ ] Final merge to main
 
 ---
 
-## 6. Timeline Ringkas
+## 14. Critical Rules ⚠️
+
+1. **RED→GREEN→REFACTOR every time** (mandatory)
+2. **Repository INTERFACE in domain, IMPL in infrastructure** (not reversed!)
+3. **Domain NEVER imports application/infrastructure** (dependency down only)
+4. **Mockito ONLY in application layer** (not in domain)
+5. **HashMap is FINAL** (no DB migration)
+6. **5 GoF patterns MUST exist** (natural placement)
+7. **Test DAILY** (don't batch at end)
+8. **Commit FREQUENT** (min 1x per file)
+9. **Aggregate = object with state** (ROOT manages internals)
+10. **Service = stateless operations** (functions across aggregates)
+
+---
+
+## 15. Timeline
 
 | Hari | Iman | Kemal | Danang | Jaya | Rafi |
 |------|------|-------|--------|------|------|
-| 1-2 | Entities + VO | - | - | - | Setup Maven + doc |
-| 2-3 | Push | Aggregates + Services | - | - | Review |
-| 3-4 | Review | Push | Use Cases + DTOs | - | Prepare |
-| 4-5 | Assist | Assist | Push | Repositories + Bus | Review |
-| 5-6 | Final test | Final test | Final test | Push | E2E + CLI |
-| 7 | Merge | Merge | Merge | Merge | Final check |
+| 1-2 | Entities | - | - | - | Setup |
+| 2-3 | Push | Services | - | - | Review |
+| 3-4 | Review | Push | Use Cases | - | Prepare |
+| 4-5 | Assist | Assist | Push | Infrastructure | Review |
+| 5-6 | Test | Test | Test | Push | E2E+CLI |
+| 7 | Merge | Merge | Merge | Merge | Final |
+
+**Dependency: IMAN→KEMAL→DANANG→JAYA→RAFI (sequential)**
 
 ---
 
-## 7. Fee Structure
+## 16. Execution Checklist
 
-| Fee Type | Value | Actor | When | Notes |
-|----------|-------|-------|------|-------|
-| **Admin Fee** | 2% | Lender | Top Up Saldo | Dipotong dari amount yang di-top up, NOT refunded saat cancel |
-| **Cancellation Penalty** | - | Borrower | After 3x cancel with ≥20% funded | 4 bulan block period dari apply baru |
-| **Borrower Fee** | - | Borrower | - | TBD (belum dalam scope) |
+**Pre-Sprint:**
+- [ ] Maven pom.xml setup (JUnit 5, Mockito)
+- [ ] Git initialized (main, develop branches)
+- [ ] Feature branches created (per person)
 
-**Contoh:**
-- Lender top up Rp 10.000.000
-- Admin fee 2% = Rp 200.000
-- Saldo final = Rp 9.800.000
+**During Sprint:**
+- [ ] Daily standup (09:00, 15 min)
+- [ ] Code review (daily)
+- [ ] Tests GREEN (daily)
+- [ ] Commits meaningful
 
-### **Credit Score Implementation:**
-
-**Approach:** Self-Declared by Borrower (NOT calculated by system)
-
-| Aspect | Detail |
-|--------|--------|
-| **Input** | Borrower input credit score during registration (range: 1-1000) |
-| **Validation** | System verify: score >= 600 to be eligible |
-| **Type** | Integer (immutable after registration) |
-| **Verification** | No external verification, trust-based model (MVP) |
-| **Use Case** | ApplyLoanUseCase: verify score >= 600 before approving loan |
-
-**Logic in LoanApprovalService:**
-```java
-public boolean verifyCreditScore(Borrower borrower) {
-    return borrower.getCreditScore() >= 600;  // Simple check, not calculation
-}
-```
+**Post-Sprint:**
+- [ ] All PRs merged
+- [ ] E2E test success
+- [ ] Coverage report >85%
+- [ ] Documentation complete
+- [ ] Final demo ready
 
 ---
 
-### **Business Rules:**
-
-1. **Cancellable States:**
-   - PENDING, VERIFIED, FUNDING (dapat dibatalkan)
-   - FUNDED, DISBURSED (TIDAK dapat dibatalkan)
-
-2. **Cancellation Count Trigger:**
-   - Hanya dihitung jika investasi sudah ≥20% dari loan amount
-   - Di bawah 20% = tidak increment counter
-
-3. **Counter Limit & Blocking:**
-   - Cancel 1x = normal
-   - Cancel 2x = warning (display di borrower profile)
-   - Cancel 3x = **BLOCKED 4 bulan** dari apply baru
-   - Block period: `lastBlockedDate + 4 months`
-
-4. **Refund Mechanism:**
-   - Get semua investment untuk loan ini
-   - Refund FULL amount ke setiap lender
-   - Admin fee 2% sudah diambil saat top up (tidak dikembalikan)
-   - Update investment.status = CANCELLED
-   - Update loan.status = CANCELLED
-
-5. **Display in CLI:**
-   - Loan list: tampilkan `cancellationCount` di borrower info
-   - Example: "Borrower: Sman (Cancelled 2x)"
-   - Prevent apply jika dalam block period
-
-### **Example Scenario:**
-
-```
-Transaction 1:
-- Borrower Sman apply 30M
-- Lender Budi invest 6M (20%)
-- Sman CANCEL → Budi refund 6M
-- Sman.cancellationCount = 1
-
-Transaction 2:
-- Sman apply 30M again
-- Lender Citra invest 8M (26%)
-- Sman CANCEL → Citra refund 8M
-- Sman.cancellationCount = 2
-
-Transaction 3:
-- Sman apply 30M again
-- Lender Dina invest 10M (33%)
-- Sman CANCEL → Dina refund 10M
-- Sman.cancellationCount = 3
-- Sman.lastBlockedDate = NOW
-- Next apply attempt blocked untuk 4 bulan
-```
-
-### **Events:**
-
-- `LoanCancelledEvent`: loanId, borrowerId, cancelledDate, totalRefunded, affectedLenders
-
----
-
-## 10. Peringatan Kritis
-
-### JANGAN LUPAKAN:
-
-1. **SETIAP fitur dimulai dengan TEST, bukan code**
-   - RED → GREEN → REFACTOR
-
-2. **Repository INTERFACE di domain, IMPLEMENTASI di infrastructure**
-   - Jangan mix-up letak file
-
-3. **Use Case wajib mock Repository di test, gunakan Mockito @Mock**
-   - Hindari akses real storage dalam unit test
-
-4. **Domain layer TIDAK BOLEH import dari application/infrastructure**
-   - Dependency: presentation → application → domain ← infrastructure
-
-5. **Scope HANYA sampai pencairan + notifikasi**
-   - IN-SCOPE: Register (with fields), Apply, Verify, Invest, Disburse, CANCELLED status, EXPIRED_FUNDING
-   - TIDAK perlu: File upload/storage, payment transaction, repayment, penalty, face recognition, dll
-
-6. **In-Memory HashMap FINAL (tidak akan ganti ke DB)**
-   - Repository pattern hanya untuk testing & decoupling, bukan untuk future migration
-   - HashMap cukup untuk sprint ini, fokus pada domain logic
-
-7. **5 GoF Pattern WAJIB ada, tapi jangan force**
-   - Natural placement is key
-
-8. **Test setiap hari, jangan kumpul di hari terakhir**
-   - TDD cycle harus konsisten setiap 1-2 jam coding
-
-9. **Git commit SERING (min 1x per use case/entity)**
-   - Avoid merge hell
-
-10. **Deploy = main branch, verified dengan CLI**
-    - No partial builds
-
----
-
-## 12. Deliverable Akhir (Hari 7 EOD)
-
-**Folder Structure:**
-- ✓ `domain/` (entities, aggregates, services, repositories interface, events)
-- ✓ `application/` (use cases, services, DTOs)
-- ✓ `infrastructure/` (repositories impl, event bus)
-- ✓ `interfaces/cli/` (LendingApp.java entry point)
-- ✓ Test folder mirror main dengan full coverage
-
-**Artifacts:**
-- ✓ `pom.xml` (JUnit + Mockito)
-- ✓ Semua class sesuai struktur
-- ✓ Semua test PASS
-- ✓ Git history clean (meaningful commits)
-- ✓ `masterplan.md` updated
-- ✓ `ARCHITECTURE.md` (detailed explanation)
-
-**Demo:**
-- ✓ CLI berjalan: register → apply → invest → disburse
-- ✓ Test results (coverage > 85%)
-- ✓ 5 pattern placement explained
-- ✓ DDD layers explained
-
----
-
-## 11. Backup: Hubungi Dosen
-
-Jika ada blocker:
-- **Architectural block:** Konsultasi dosen → Kemal/Rafi coordinate
-- **Scope creep:** Dosen approval → freeze scope
-- **Time pressure:** Prioritize core flow (register, apply, invest, disburse)
-
----
-
-## 13. Key Success Factors
-
-1. **Parallelism** → 5 orang bekerja 5 task berbeda → selesai dalam 1 minggu
-2. **Clear dependency** → Layer per layer, interface-first design
-3. **TDD consistency** → Test tulis dulu, code mengikuti
-4. **Mockito mastery** → Repository mock di setiap use case test
-5. **Communication** → Daily standup, issue raising cepat
-
----
-
-**Good luck, tim! 🚀**
+**Good luck! 🚀**
