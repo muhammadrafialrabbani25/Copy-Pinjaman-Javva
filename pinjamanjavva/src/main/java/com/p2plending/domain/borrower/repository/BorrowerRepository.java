@@ -1,0 +1,4 @@
+package com.p2plending.domain.borrower.repository;
+
+public interface BorrowerRepository {
+}
