@@ -1,0 +1,31 @@
+package com.p2plending.application.borrower.dto;
+
+public class BorrowerDTO {
+    private final String id;
+    private final String name;
+    private final String ktpNumber;
+    private final long monthlySalary;
+
+    public BorrowerDTO(String id, String name, String ktpNumber, long monthlySalary) {
+        this.id = id;
+        this.name = name;
+        this.ktpNumber = ktpNumber;
+        this.monthlySalary = monthlySalary;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getKtpNumber() {
+        return ktpNumber;
+    }
+
+    public long getMonthlySalary() {
+        return monthlySalary;
+    }
+}
