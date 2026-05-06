@@ -8,10 +8,11 @@
 ### 1.1 Fitur yang Dikembangkan
 
 #### Borrower (Peminjam)
-- Pendaftaran Borrower (nama, no telepon, alamat, KTP, selfie, gaji, pekerjaan, riwayat pinjaman)
+- Pendaftaran Borrower (nama, no telepon, alamat, KTP, selfie, gaji, pekerjaan, riwayat pinjaman, **credit score self-declare**)
 - Pengajuan Loan (PENDING → VERIFIED)
 - Verifikasi Data KTP (strict check, nama & umur harus sesuai)
-- Pemberian Credit Score & Limit
+- Verifikasi Credit Score (min 600, self-declared by borrower)
+- Pemberian Loan Limit
 - Masuk List Loan (deadline 5 hari funding, status EXPIRED jika > 5 hari)
 - Pencairan Dana (jika fully funded)
 - Bisa cancel aplikasi (status CANCELLED) - jika sudah ada investasi ≥20%, increment cancellation counter
@@ -27,7 +28,7 @@
 
 #### Core Logic
 - Validasi Limit Peminjaman (3x gaji)
-- Perhitungan Credit Score (min 600)
+- Verifikasi Credit Score (min 600, self-declared input dari borrower)
 - Perhitungan Cicilan Bulanan
 - State Transition: PENDING → VERIFIED → FUNDING → FUNDED → DISBURSED
 - State khusus: CANCELLED (borrower/lender cancel), EXPIRED_FUNDING (waiting > 5 hari tanpa full funding)
@@ -272,7 +273,7 @@ Shared Domain (3 files):
 
 | Entity | Fields | Type | Notes |
 |--------|--------|------|-------|
-| **Borrower** | id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, riwayatPinjaman, cancellationCount, lastBlockedDate | String/Money/Integer/LocalDateTime | cancellationCount incremented when cancel ≥20% funded; lastBlockedDate set after 3x cancel |
+| **Borrower** | id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, riwayatPinjaman, creditScore, cancellationCount, lastBlockedDate | String/Money/Integer/LocalDateTime | creditScore: self-declared by borrower (1-1000); cancellationCount incremented when cancel ≥20% funded |
 | **Lender** | id, nama, noTelepon, alamat, ktp, selfie, pekerjaan, saldo | String/Money | Saldo mutable (topUp) |
 | **LoanApplication** | id, borrowerId, amount, tenor, creditScore, status, createdDate, minInvestedPercentageReached, cancelledDate | Long/Money/Enum/boolean/LocalDateTime | status = PENDING/VERIFIED/FUNDING/FUNDED/DISBURSED/CANCELLED/EXPIRED_FUNDING; minInvestedPercentageReached tracks if 20%+ invested |
 | **KTP** | nomorKTP, nama, tanggalLahir | String/LocalDate | Format: 16 digit, non-null checks |
@@ -305,7 +306,7 @@ Borrower Aggregates (1 file):
 1. `domain/borrower/aggregate/LoanAggregate.java` (Aggregate Root with State Pattern)
 
 Borrower Services (3 files):
-2. `domain/borrower/service/LoanApprovalService.java` (verifyCreditScore, calculateLoanLimit, verifyKTP)
+2. `domain/borrower/service/LoanApprovalService.java` (verifyCreditScore: score>=600?, calculateLoanLimit: salary*3, verifyKTP)
 3. `domain/borrower/service/PaymentScheduleService.java` (Strategy Pattern for interest calculation)
 4. `domain/borrower/service/LoanCancellationService.java` (NEW - handle cancellation logic, refund logic, counter increment, block period check)
 
@@ -572,9 +573,26 @@ Setiap hari 15 menit:
 - Admin fee 2% = Rp 200.000
 - Saldo final = Rp 9.800.000
 
----
+### **Credit Score Implementation:**
 
-## 9. Loan Cancellation Feature
+**Approach:** Self-Declared by Borrower (NOT calculated by system)
+
+| Aspect | Detail |
+|--------|--------|
+| **Input** | Borrower input credit score during registration (range: 1-1000) |
+| **Validation** | System verify: score >= 600 to be eligible |
+| **Type** | Integer (immutable after registration) |
+| **Verification** | No external verification, trust-based model (MVP) |
+| **Use Case** | ApplyLoanUseCase: verify score >= 600 before approving loan |
+
+**Logic in LoanApprovalService:**
+```java
+public boolean verifyCreditScore(Borrower borrower) {
+    return borrower.getCreditScore() >= 600;  // Simple check, not calculation
+}
+```
+
+---
 
 ### **Business Rules:**
 
