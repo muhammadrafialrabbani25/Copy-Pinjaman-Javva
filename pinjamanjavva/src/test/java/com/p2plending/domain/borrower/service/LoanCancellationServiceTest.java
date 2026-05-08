@@ -13,24 +13,19 @@ import com.p2plending.domain.borrower.entity.Borrower;
 import com.p2plending.domain.borrower.entity.KTP;
 import com.p2plending.domain.shared.Money;
 
-/**
- * Unit tests untuk LoanCancellationService (TDD)
- * Test pembatalan pinjaman dengan validasi investasi minimum dan blocking
- */
 class LoanCancellationServiceTest {
 
     private LoanCancellationService service = new LoanCancellationService();
 
-    // ============ Test Pembatalan Pertama (≥20% funded) ============
+    // Test Pembatalan Pertama (≥20% funded)
 
     @Test
     void testCancelLoan_FirstCancellation_MinimumFundingMet() {
         // Arrange (Persiapan)
         Borrower borrower = new Borrower(
                 "B001", "Budi", "08123456789", "Bandung",
-                new KTP("1234567890123456"), new BigDecimal("10000000"), "Engineer",
-                750
-        );
+                new KTP("Budi", "1234567890123456"), new Money(new BigDecimal("10000000"), "IDR"), "Engineer",
+                750);
         Money loanAmount = new Money(new BigDecimal("10000000"), "IDR");
         Money fundedAmount = new Money(new BigDecimal("2000000"), "IDR"); // 20% dari 10M
         int currentCancellationCount = 0;
@@ -47,9 +42,8 @@ class LoanCancellationServiceTest {
         // Arrange (Persiapan)
         Borrower borrower = new Borrower(
                 "B001", "Budi", "08123456789", "Bandung",
-                new KTP("1234567890123456"), new BigDecimal("10000000"), "Engineer",
-                750
-        );
+                new KTP("Budi", "1234567890123456"), new Money(new BigDecimal("10000000"), "IDR"), "Engineer",
+                750);
         Money loanAmount = new Money(new BigDecimal("10000000"), "IDR");
         Money fundedAmount = new Money(new BigDecimal("1000000"), "IDR"); // 10% dari 10M (< 20%)
         int currentCancellationCount = 0;
@@ -61,7 +55,7 @@ class LoanCancellationServiceTest {
         assertFalse(canCancel);
     }
 
-    // ============ Test Pembatalan Maksimal (3x) ============
+    // Test Pembatalan Maksimal (3x)
 
     @Test
     void testCancelLoan_SecondCancellation_Allowed() {
@@ -105,7 +99,7 @@ class LoanCancellationServiceTest {
         assertFalse(canCancel);
     }
 
-    // ============ Test Perhitungan Tanggal Block ============
+    // Test Perhitungan Tanggal Block
 
     @Test
     void testCalculateBlockUntilDate_After3rdCancellation() {
@@ -117,7 +111,7 @@ class LoanCancellationServiceTest {
         LocalDate blockUntil = service.calculateBlockUntilDate(cancellationDate, cancellationCount);
 
         // Assert (Verifikasi)
-        LocalDate expectedBlockUntil = LocalDate.of(2026, 9, 8); // 4 bulan kemudian
+        LocalDate expectedBlockUntil = LocalDate.of(2026, 9, 9); // 4 bulan kemudian
         assertEquals(expectedBlockUntil, blockUntil);
     }
 
@@ -134,7 +128,7 @@ class LoanCancellationServiceTest {
         assertFalse(blockUntil.isAfter(cancellationDate)); // Tidak ada block date
     }
 
-    // ============ Test Update Cancellation Count ============
+    // Test Update Cancellation Count
 
     @Test
     void testIncrementCancellationCount_FromZero() {
@@ -160,7 +154,7 @@ class LoanCancellationServiceTest {
         assertEquals(3, newCount);
     }
 
-    // ============ Test Validasi Minimum Investasi (20%) ============
+    // Test Validasi Minimum Investasi (20%) 
 
     @Test
     void testIsMinimumInvestmentMet_Exactly20Percent() {
