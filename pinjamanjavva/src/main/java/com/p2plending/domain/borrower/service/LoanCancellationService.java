@@ -1,7 +1,7 @@
 package com.p2plending.domain.borrower.service;
 
 import com.p2plending.domain.borrower.entity.Borrower;
-import com.p2plending.domain.borrower.entity.LoanApplicationTest;
+import com.p2plending.domain.borrower.entity.LoanApplication;
 import com.p2plending.domain.lender.entity.Investment;
 import com.p2plending.domain.shared.Money;
 import java.time.LocalDateTime;
@@ -39,7 +39,7 @@ public class LoanCancellationService {
      * @param reason   cancellation reason (optional)
      * @return true if cancellation successful, false if not eligible
      */
-    public boolean cancelLoan(LoanApplicationTest loan, Borrower borrower, String reason) {
+    public boolean cancelLoan(LoanApplication loan, Borrower borrower, String reason) {
         // TODO: Implement
         // 1. Validate loan state: PENDING, VERIFIED, FUNDING only
         // if (loan.getStatus() == FUNDED || loan.getStatus() == DISBURSED)
