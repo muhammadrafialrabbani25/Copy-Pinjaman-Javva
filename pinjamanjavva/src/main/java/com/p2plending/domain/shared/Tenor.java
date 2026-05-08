@@ -1,7 +1,7 @@
 package com.p2plending.domain.shared;
 
 
-enum Tenor {
+public enum Tenor {
     ONE_MONTH(1),
     THREE_MONTHS(3),
     SIX_MONTHS(6),
