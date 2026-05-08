@@ -12,10 +12,12 @@ C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\service\LoanCancellationServiceTest.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\service\package-info.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\service\PaymentScheduleServiceTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\aggregate\LenderAggregateTest.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\aggregate\package-info.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\InvestmentTest.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\LenderTest.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\service\InvestmentServiceTest.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\service\package-info.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\LoanStatusTest.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\MoneyTest.java

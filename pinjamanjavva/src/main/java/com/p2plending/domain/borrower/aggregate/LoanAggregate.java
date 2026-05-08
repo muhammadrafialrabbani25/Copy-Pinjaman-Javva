@@ -12,9 +12,6 @@ import com.p2plending.domain.shared.LoanStatus;
 import com.p2plending.domain.shared.Money;
 import com.p2plending.domain.shared.Tenor;
 
-/**
- * Manages loan creation, state transitions, and investment tracking
- */
 public class LoanAggregate {
 
     private static final int MIN_CREDIT_SCORE = 600;
@@ -31,10 +28,6 @@ public class LoanAggregate {
         this.investments = new ArrayList<>();
     }
 
-    /**
-     * Factory Method (Factory Pattern)
-     * Validate borrower eligibility and create loan with PENDING status
-     */
     public static LoanAggregate create(Borrower borrower, Money amount, Tenor tenor) {
         validateBorrowerEligibility(borrower);
         validateLoanAmount(borrower, amount);
@@ -80,9 +73,6 @@ public class LoanAggregate {
         }
     }
 
-    /**
-     * Get loan status (State Pattern - delegated to LoanStatus)
-     */
     public LoanStatus getStatus() {
         return loan.getStatus();
     }
