@@ -113,7 +113,7 @@ Shared (3):
 - LoanStatus.java (enum: 7 states)
 
 **Key Fields:**
-- Borrower: id, nama, noTelepon, alamat, ktp, selfie, gaji, pekerjaan, creditScore, cancellationCount, lastBlockedDate
+- Borrower: id, nama, noTelepon, alamat, ktp, gaji, pekerjaan, creditScore, cancellationCount, lastBlockedDate
 - LoanApplication: id, borrowerId, amount, tenor, status, createdDate, minInvestedPercentageReached, cancelledDate
 - Investment: id, lenderId, loanId, amount, status
 

@@ -1,20 +1,21 @@
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\borrower\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\lender\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\shared\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\aggregate\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\BorrowerTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\KTPTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\LoanApplicationTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\PaymentTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\service\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\aggregate\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\InvestmentTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\LenderTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\service\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\LoanStatusTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\MoneyTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\package-info.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\TenorTest.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\integration\EndToEndFlowTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\borrower\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\lender\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\shared\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\aggregate\LoanAggregateTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\aggregate\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\BorrowerTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\KTPTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\LoanApplicationTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\entity\PaymentTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\service\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\aggregate\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\InvestmentTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\LenderTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\entity\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\lender\service\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\LoanStatusTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\MoneyTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\package-info.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\shared\TenorTest.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\integration\EndToEndFlowTest.java
