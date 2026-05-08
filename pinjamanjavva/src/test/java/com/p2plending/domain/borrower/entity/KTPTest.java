@@ -1,16 +1,15 @@
 package com.p2plending.domain.borrower.entity;
 
-
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class KTPTest {
-    @Test 
-    void shouldCreateKTPWithValidData(){
+    @Test
+    void shouldCreateKTPWithValidData() {
         String nomorKtp = "1234567890123456";
         String nama = "budi";
 
-        KTP ktp = new KTP(nomorKtp,nama);
+        KTP ktp = new KTP(nama, nomorKtp);
 
         assertEquals(nama, ktp.getNama());
         assertEquals(nomorKtp, ktp.getNomorKtp());
@@ -22,7 +21,7 @@ public class KTPTest {
         String nama = "budi";
 
         assertThrows(IllegalArgumentException.class, () -> {
-            new KTP("123456789012345", nama);
+            new KTP(nama, "123456789012345");
         });
     }
 
@@ -44,7 +43,7 @@ public class KTPTest {
         assertThrows(IllegalArgumentException.class, () -> {
             new KTP(null, nomorKtp);
         });
-    
+
     }
 
     @Test
@@ -54,8 +53,8 @@ public class KTPTest {
         String nomorKtp = "1234567890123456";
         String nama = "budi";
 
-        KTP ktp2 = new KTP(nomorKtp2, nama2);
-        KTP ktp = new KTP(nomorKtp, nama);
+        KTP ktp2 = new KTP(nama2, nomorKtp2);
+        KTP ktp = new KTP(nama, nomorKtp);
 
         assertEquals(ktp2, ktp);
     }
@@ -67,8 +66,8 @@ public class KTPTest {
         String nomorKtp = "1234567890123456";
         String nama = "budi";
 
-        KTP ktp2 = new KTP(nomorKtp2, nama2);
-        KTP ktp = new KTP(nomorKtp, nama);
+        KTP ktp2 = new KTP(nama2, nomorKtp2);
+        KTP ktp = new KTP(nama, nomorKtp);
 
         assertNotEquals(ktp2, ktp);
     }

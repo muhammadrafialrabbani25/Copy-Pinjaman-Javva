@@ -4,7 +4,7 @@ public class KTP {
     private final String nama;
     private final String nomorKtp;
 
-    public KTP(String nomorKTP, String nama) {
+    public KTP(String nama, String nomorKTP) {
         if(nama == null){
             throw new IllegalArgumentException("masukan nama anda");
         }
