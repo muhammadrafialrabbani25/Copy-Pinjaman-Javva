@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.012" tests="6" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.022" tests="20" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -56,10 +56,24 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="shouldHaveFalseMinInvestedPercentageWhenCreated" classname="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.002"/>
-  <testcase name="shouldThrowExceptionWhenTenorIsNull" classname="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.004"/>
-  <testcase name="shouldThrowExceptionWhenAmountIsNull" classname="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.002"/>
-  <testcase name="shouldHaveNullCancelledDateWhenCreated" classname="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.001"/>
-  <testcase name="shouldHavePendingStatusWhenCreated" classname="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.0"/>
-  <testcase name="shouldCreateLoanApplicationWithValidData" classname="com.p2plending.domain.borrower.entity.LoanApplicationTest" time="0.001"/>
+  <testcase name="testCalculateAdminFee_NullAmount_ThrowsException" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testCalculateAdminFee_5MillionTopUp_Returns100Thousand" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testCalculateFinalAmount_10MillionTopUp_Returns9Point8Million" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testCalculateFinalAmount_ZeroAmount_ReturnsZero" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testFullWorkflow_ValidInvestmentWith20Percent" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testCalculateAdminFee_ZeroAmount_ReturnsZero" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testCalculateFinalAmount_1MillionTopUp_Returns980Thousand" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testValidateMinimumInvestment_NullLoanAmount_ThrowsException" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.002"/>
+  <testcase name="testValidateMinimumInvestment_SmallLoan_ReturnsTrue" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testValidateMinimumInvestment_ZeroAmount_ReturnsFalse" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testValidateMinimumInvestment_ExactlyMinimum_ReturnsTrue" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testValidateMinimumInvestment_NullInvestmentAmount_ThrowsException" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testValidateMinimumInvestment_BelowMinimum_ReturnsFalse" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testCalculateAdminFee_10MillionTopUp_Returns200Thousand" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testCalculateFinalAmount_NullAmount_ThrowsException" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testValidateMinimumInvestment_HalfAmount_ReturnsTrue" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testFullWorkflow_LargeInvestment50Percent" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testCalculateAdminFee_1MillionTopUp_Returns20Thousand" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
+  <testcase name="testCalculateFinalAmount_5MillionTopUp_Returns4Point9Million" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.001"/>
+  <testcase name="testValidateMinimumInvestment_AboveMinimum_ReturnsTrue" classname="com.p2plending.domain.lender.service.InvestmentServiceTest" time="0.0"/>
 </testsuite>
