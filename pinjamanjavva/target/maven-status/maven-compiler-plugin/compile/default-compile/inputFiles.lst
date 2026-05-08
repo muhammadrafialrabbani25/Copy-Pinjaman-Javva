@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\ApplyLoanCommand.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\BorrowerDTO.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\CancelLoanCommand.java
@@ -47,53 +46,3 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastru
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLoanRepository.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\SharedStorage.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\interfaces\cli\LendingApp.java
-=======
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\ApplyLoanCommand.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\BorrowerDTO.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\CancelLoanCommand.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\LoanDTO.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\RegisterBorrowerCommand.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\service\BorrowerApplicationService.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\RegisterBorrowerUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\AvailableLoanDTO.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\InvestCommand.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\LenderDTO.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\RegisterLenderCommand.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\service\LenderApplicationService.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCase.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\aggregate\LoanAggregate.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Borrower.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\KTP.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\LoanApplication.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Payment.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\event\LoanEvent.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\BorrowerRepository.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanApprovalService.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanCancellationService.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\PaymentScheduleService.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\aggregate\LenderAggregate.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Investment.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Lender.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\event\InvestmentEvent.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\LenderRepository.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\service\InvestmentService.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\DomainEventPublisher.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\LoanStatus.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\Money.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\Tenor.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\event\SimpleEventBus.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryBorrowerRepository.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryInvestmentRepository.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLenderRepository.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLoanRepository.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\SharedStorage.java
-D:\file java\Tugas Besar Tekpro Kelompok A4\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\interfaces\cli\LendingApp.java
->>>>>>> main

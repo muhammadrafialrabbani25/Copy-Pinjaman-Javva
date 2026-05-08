@@ -1,4 +1,21 @@
 -------------------------------------------------------------------------------
 Test set: com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.948 s <<< FAILURE! -- in com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest
+com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest.shouldRegisterBorrowerSuccessfully -- Time elapsed: 0.894 s <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+Cannot instantiate @InjectMocks field named 'registerBorrowerUseCase'! Cause: the type 'RegisterBorrowerUseCase' is an interface.
+You haven't provided the instance at field declaration so I tried to construct the instance.
+Examples of correct usage of @InjectMocks:
+   @InjectMocks Service service = new Service();
+   @InjectMocks Service service;
+   //and... don't forget about some @Mocks for injection :)
+
+	at org.mockito.junit.jupiter.MockitoExtension.beforeEach(MockitoExtension.java:153)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	Suppressed: java.lang.NullPointerException: Cannot invoke "java.util.Set.forEach(java.util.function.Consumer)" because the return value of "org.junit.jupiter.api.extension.ExtensionContext$Store.remove(Object, java.lang.Class)" is null
+		at org.mockito.junit.jupiter.MockitoExtension.afterEach(MockitoExtension.java:184)
+		... 2 more
+
