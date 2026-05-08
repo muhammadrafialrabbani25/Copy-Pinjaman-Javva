@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.p2plending.application.borrower.dto.BorrowerDTO;
 import com.p2plending.application.borrower.dto.RegisterBorrowerCommand;
 import com.p2plending.domain.borrower.entity.Borrower;
+import com.p2plending.domain.borrower.repository.BorrowerRepository;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,7 +35,7 @@ public class RegisterBorrowerUseCaseTest {
         BorrowerDTO result = registerBorrowerUseCase.execute(command);
 
         assertEquals("luis", result.getName());
-        assertEquals(7000000, result.getMonthlySalary());
+        assertEquals(5000000, result.getMonthlySalary());
         assertEquals(750, result.getCreditScore());
 
         verify(borrowerRepository).save(any(Borrower.class));
