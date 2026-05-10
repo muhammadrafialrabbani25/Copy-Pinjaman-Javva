@@ -5,9 +5,13 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\applicati
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\RegisterBorrowerCommand.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\service\BorrowerApplicationService.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\RegisterBorrowerUseCase.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\AvailableLoanDTO.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\InvestCommand.java
@@ -15,9 +19,13 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\applicati
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\RegisterLenderCommand.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\service\LenderApplicationService.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCase.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\aggregate\LoanAggregate.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Borrower.java
@@ -26,6 +34,7 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\bo
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Payment.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\event\LoanEvent.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\BorrowerRepository.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\LoanRepository.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanApprovalService.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanCancellationService.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\PaymentScheduleService.java
@@ -33,6 +42,7 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\le
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Investment.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Lender.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\event\InvestmentEvent.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\InvestmentRepository.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\LenderRepository.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\service\InvestmentService.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\DomainEventPublisher.java

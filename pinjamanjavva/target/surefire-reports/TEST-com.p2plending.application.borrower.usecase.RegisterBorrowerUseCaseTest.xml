@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest" time="0.948" tests="1" errors="1" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest" time="0.008" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="25"/>
     <property name="sun.cpu.isalist" value="amd64"/>
     <property name="sun.jnu.encoding" value="Cp1252"/>
     <property name="java.class.path" value="D:\github\A4-Pinjaman-Javva\pinjamanjavva\target\test-classes;D:\github\A4-Pinjaman-Javva\pinjamanjavva\target\classes;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter\5.10.0\junit-jupiter-5.10.0.jar;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.0\junit-jupiter-api-5.10.0.jar;C:\Users\luis\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\luis\.m2\repository\org\junit\platform\junit-platform-commons\1.10.0\junit-platform-commons-1.10.0.jar;C:\Users\luis\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.0\junit-jupiter-params-5.10.0.jar;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.0\junit-jupiter-engine-5.10.0.jar;C:\Users\luis\.m2\repository\org\junit\platform\junit-platform-engine\1.10.0\junit-platform-engine-1.10.0.jar;C:\Users\luis\.m2\repository\org\mockito\mockito-core\5.5.0\mockito-core-5.5.0.jar;C:\Users\luis\.m2\repository\net\bytebuddy\byte-buddy\1.14.6\byte-buddy-1.14.6.jar;C:\Users\luis\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.6\byte-buddy-agent-1.14.6.jar;C:\Users\luis\.m2\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;C:\Users\luis\.m2\repository\org\mockito\mockito-junit-jupiter\5.5.0\mockito-junit-jupiter-5.5.0.jar;"/>
     <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="net.bytebuddy.experimental" value="true"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="user.variant" value=""/>
     <property name="java.vendor.url" value="https://java.oracle.com/"/>
@@ -15,7 +16,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="ID"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-25.0.2\bin"/>
-    <property name="sun.java.command" value="C:\Users\luis\AppData\Local\Temp\surefire343341793607770275\surefirebooter-20260508102244149_3.jar C:\Users\luis\AppData\Local\Temp\surefire343341793607770275 2026-05-08T10-22-43_944-jvmRun1 surefire-20260508102244149_1tmp surefire_0-20260508102244149_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\luis\AppData\Local\Temp\surefire11360249263671677359\surefirebooter-20260510171219277_3.jar C:\Users\luis\AppData\Local\Temp\surefire11360249263671677359 2026-05-10T17-12-19_089-jvmRun1 surefire-20260510171219277_1tmp surefire_0-20260510171219277_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\github\A4-Pinjaman-Javva\pinjamanjavva\target\test-classes;D:\github\A4-Pinjaman-Javva\pinjamanjavva\target\classes;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter\5.10.0\junit-jupiter-5.10.0.jar;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.0\junit-jupiter-api-5.10.0.jar;C:\Users\luis\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\luis\.m2\repository\org\junit\platform\junit-platform-commons\1.10.0\junit-platform-commons-1.10.0.jar;C:\Users\luis\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.0\junit-jupiter-params-5.10.0.jar;C:\Users\luis\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.0\junit-jupiter-engine-5.10.0.jar;C:\Users\luis\.m2\repository\org\junit\platform\junit-platform-engine\1.10.0\junit-platform-engine-1.10.0.jar;C:\Users\luis\.m2\repository\org\mockito\mockito-core\5.5.0\mockito-core-5.5.0.jar;C:\Users\luis\.m2\repository\net\bytebuddy\byte-buddy\1.14.6\byte-buddy-1.14.6.jar;C:\Users\luis\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.6\byte-buddy-agent-1.14.6.jar;C:\Users\luis\.m2\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;C:\Users\luis\.m2\repository\org\mockito\mockito-junit-jupiter\5.5.0\mockito-junit-jupiter-5.5.0.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +31,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\luis\AppData\Local\Temp\surefire343341793607770275\surefirebooter-20260508102244149_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\luis\AppData\Local\Temp\surefire11360249263671677359\surefirebooter-20260510171219277_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="25.0.2+10-LTS-69"/>
@@ -59,27 +60,5 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="69.0"/>
   </properties>
-  <testcase name="shouldRegisterBorrowerSuccessfully" classname="com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest" time="0.894">
-    <error message="&#10;Cannot instantiate @InjectMocks field named &apos;registerBorrowerUseCase&apos;! Cause: the type &apos;RegisterBorrowerUseCase&apos; is an interface.&#10;You haven&apos;t provided the instance at field declaration so I tried to construct the instance.&#10;Examples of correct usage of @InjectMocks:&#10;   @InjectMocks Service service = new Service();&#10;   @InjectMocks Service service;&#10;   //and... don&apos;t forget about some @Mocks for injection :)&#10;" type="org.mockito.exceptions.base.MockitoException"><![CDATA[org.mockito.exceptions.base.MockitoException: 
-
-Cannot instantiate @InjectMocks field named 'registerBorrowerUseCase'! Cause: the type 'RegisterBorrowerUseCase' is an interface.
-You haven't provided the instance at field declaration so I tried to construct the instance.
-Examples of correct usage of @InjectMocks:
-   @InjectMocks Service service = new Service();
-   @InjectMocks Service service;
-   //and... don't forget about some @Mocks for injection :)
-
-	at org.mockito.junit.jupiter.MockitoExtension.beforeEach(MockitoExtension.java:153)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
-	Suppressed: java.lang.NullPointerException: Cannot invoke "java.util.Set.forEach(java.util.function.Consumer)" because the return value of "org.junit.jupiter.api.extension.ExtensionContext$Store.remove(Object, java.lang.Class)" is null
-		at org.mockito.junit.jupiter.MockitoExtension.afterEach(MockitoExtension.java:184)
-		... 2 more
-]]></error>
-    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (C:\Users\luis\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.6\byte-buddy-agent-1.14.6.jar)
-WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
-WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
-WARNING: Dynamic loading of agents will be disallowed by default in a future release
-]]></system-err>
-  </testcase>
+  <testcase name="testRegisterBorrower" classname="com.p2plending.application.borrower.usecase.RegisterBorrowerUseCaseTest" time="0.006"/>
 </testsuite>
