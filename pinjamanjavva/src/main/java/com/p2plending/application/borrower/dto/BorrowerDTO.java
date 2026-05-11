@@ -1,31 +1,39 @@
 package com.p2plending.application.borrower.dto;
 
+import java.math.BigDecimal;
+
 public class BorrowerDTO {
     private final String id;
-    private final String name;
-    private final String ktpNumber;
-    private final long monthlySalary;
+    private final String nama;
+    private final String nomorKtp;
+    private final BigDecimal gaji;
+    private final int creditScore;
 
-    public BorrowerDTO(String id, String name, String ktpNumber, long monthlySalary) {
+    public BorrowerDTO(String id, String nama, String nomorKtp, BigDecimal gaji, int creditScore) {
         this.id = id;
-        this.name = name;
-        this.ktpNumber = ktpNumber;
-        this.monthlySalary = monthlySalary;
+        this.nama = nama;
+        this.nomorKtp = nomorKtp;
+        this.gaji = gaji;
+        this.creditScore = creditScore;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getNama() {
+        return nama;
     }
 
-    public String getKtpNumber() {
-        return ktpNumber;
+    public String getNomorKtp() {
+        return nomorKtp;
     }
 
-    public long getMonthlySalary() {
-        return monthlySalary;
+    public BigDecimal getGaji() {
+        return gaji;
+    }
+
+    public int getCreditScore() {
+        return creditScore;
     }
 }
