@@ -26,7 +26,12 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\applicati
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCase.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCaseImpl.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanCommand.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCaseImpl.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseLoanCommand.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseUseCase.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseUseCaseImpl.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\aggregate\LoanAggregate.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Borrower.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\KTP.java

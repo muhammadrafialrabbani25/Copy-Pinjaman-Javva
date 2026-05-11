@@ -9,6 +9,8 @@ D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\applicati
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\lender\usecase\InvestLoanUseCaseTest.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\lender\usecase\RegisterLenderUseCaseTest.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCaseTest.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\shared\ApproveLoanUseCaseTest.java
+D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\shared\DisburseUseCaseTest.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\application\shared\package-info.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\aggregate\LoanAggregateTest.java
 D:\github\A4-Pinjaman-Javva\pinjamanjavva\src\test\java\com\p2plending\domain\borrower\aggregate\package-info.java
