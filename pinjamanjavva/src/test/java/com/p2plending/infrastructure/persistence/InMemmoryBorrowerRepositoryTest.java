@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryBorrowerRepositoryTest {
+public class InMemmoryBorrowerRepositoryTest {
 
     private InMemoryBorrowerRepository repository;
 
