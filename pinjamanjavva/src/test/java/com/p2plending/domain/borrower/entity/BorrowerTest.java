@@ -6,7 +6,6 @@ import com.p2plending.domain.shared.Money;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public class BorrowerTest {
     @Test
