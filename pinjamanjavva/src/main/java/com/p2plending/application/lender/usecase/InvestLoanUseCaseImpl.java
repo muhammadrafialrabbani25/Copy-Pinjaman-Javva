@@ -12,7 +12,6 @@ import com.p2plending.domain.shared.LoanStatus;
 import com.p2plending.domain.shared.Money;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public class InvestLoanUseCaseImpl implements InvestLoanUseCase {
 

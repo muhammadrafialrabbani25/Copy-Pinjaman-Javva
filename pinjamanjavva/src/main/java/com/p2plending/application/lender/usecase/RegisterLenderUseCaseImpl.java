@@ -6,7 +6,6 @@ import com.p2plending.domain.lender.entity.Lender;
 import com.p2plending.domain.borrower.entity.KTP;
 import com.p2plending.domain.lender.repository.LenderRepository;
 import com.p2plending.domain.shared.Money;
-import java.math.BigDecimal;
 
 public class RegisterLenderUseCaseImpl implements RegisterLenderUseCase {
     private final LenderRepository lenderRepository;
