@@ -1,0 +1,10 @@
+# Abaikan semua file hasil kompilasi Java
+*.class
+
+# Abaikan seluruh folder target (standar Maven)
+target/
+
+# Abaikan settingan IDE (opsional tapi disarankan)
+.vscode/
+.idea/
+*.iml
