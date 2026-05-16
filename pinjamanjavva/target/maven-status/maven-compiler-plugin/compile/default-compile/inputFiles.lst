@@ -45,6 +45,15 @@ C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\PaymentScheduleService.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\strategy\FlatInterestStrategy.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\strategy\PaymentCalculationStrategy.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\AbstractLoanState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\CancelledState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\DisbursedState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\ExpiredFundingState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\FundedState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\FundingState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\LoanState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\PendingState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\VerifiedState.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\aggregate\LenderAggregate.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Investment.java
 C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Lender.java

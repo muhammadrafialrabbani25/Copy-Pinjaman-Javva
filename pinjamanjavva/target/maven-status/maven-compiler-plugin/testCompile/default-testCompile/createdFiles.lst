@@ -1,5 +1,6 @@
 com\p2plending\application\lender\usecase\TopUpSaldoUseCaseTest.class
 com\p2plending\infrastructure\persistence\InMemmoryLoanRepositoryTest.class
+com\p2plending\domain\borrower\aggregate\LoanAggregateStatePatternTest.class
 com\p2plending\domain\borrower\service\package-info.class
 com\p2plending\application\lender\usecase\GetAvailableLoansUseCaseTest.class
 com\p2plending\domain\borrower\service\LoanCancellationServiceTest.class
