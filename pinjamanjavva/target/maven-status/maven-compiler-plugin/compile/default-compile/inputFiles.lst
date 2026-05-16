@@ -1,63 +1,74 @@
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\ApplyLoanCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\BorrowerDTO.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\CancelLoanCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\LoanDTO.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\RegisterBorrowerCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\service\BorrowerApplicationService.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\RegisterBorrowerUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\AvailableLoanDTO.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\InvestCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\LenderDTO.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\RegisterLenderCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\service\LenderApplicationService.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseLoanCommand.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseUseCase.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseUseCaseImpl.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\aggregate\LoanAggregate.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Borrower.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\KTP.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\LoanApplication.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Payment.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\event\LoanEvent.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\BorrowerRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\LoanRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanApprovalService.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanCancellationService.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\PaymentScheduleService.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\aggregate\LenderAggregate.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Investment.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Lender.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\event\InvestmentEvent.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\InvestmentRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\LenderRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\service\InvestmentService.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\DomainEventPublisher.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\LoanStatus.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\Money.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\Tenor.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\event\SimpleEventBus.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryBorrowerRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryInvestmentRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLenderRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLoanRepository.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\SharedStorage.java
-C:\Users\alrab\Documents\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\interfaces\cli\LendingApp.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\ApplyLoanCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\BorrowerDTO.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\CancelLoanCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\LoanDTO.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\dto\RegisterBorrowerCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\service\BorrowerApplicationService.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\ApplyLoanUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\CancelLoanUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanDetailsUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\GetLoanListUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\borrower\usecase\RegisterBorrowerUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\AvailableLoanDTO.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\InvestCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\LenderDTO.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\dto\RegisterLenderCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\service\LenderApplicationService.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\GetAvailableLoansUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\InvestLoanUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\RegisterLenderUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\lender\usecase\TopUpSaldoUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\ApproveLoanUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseLoanCommand.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseUseCase.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\application\shared\DisburseUseCaseImpl.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\aggregate\LoanAggregate.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Borrower.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\KTP.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\LoanApplication.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\entity\Payment.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\event\LoanEvent.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\BorrowerRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\repository\LoanRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanApprovalService.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\LoanCancellationService.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\PaymentScheduleService.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\strategy\FlatInterestStrategy.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\service\strategy\PaymentCalculationStrategy.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\AbstractLoanState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\CancelledState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\DisbursedState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\ExpiredFundingState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\FundedState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\FundingState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\LoanState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\PendingState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\borrower\state\VerifiedState.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\aggregate\LenderAggregate.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Investment.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\entity\Lender.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\event\InvestmentEvent.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\InvestmentRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\repository\LenderRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\lender\service\InvestmentService.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\DomainEventPublisher.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\LoanStatus.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\Money.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\domain\shared\Tenor.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\event\SimpleEventBus.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryBorrowerRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryInvestmentRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLenderRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\InMemoryLoanRepository.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\infrastructure\persistence\SharedStorage.java
+C:\Users\kemal\OneDrive\ドキュメント\JAVA\Tugas Project\A4-Pinjaman-Javva\pinjamanjavva\src\main\java\com\p2plending\interfaces\cli\LendingApp.java
