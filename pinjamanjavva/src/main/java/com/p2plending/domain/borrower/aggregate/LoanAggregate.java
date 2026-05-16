@@ -1,12 +1,15 @@
 package com.p2plending.domain.borrower.aggregate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.p2plending.domain.borrower.entity.Borrower;
 import com.p2plending.domain.borrower.entity.LoanApplication;
+import com.p2plending.domain.borrower.service.LoanCancellationService;
+import com.p2plending.domain.borrower.state.CancelledState;
 import com.p2plending.domain.borrower.state.LoanState;
 import com.p2plending.domain.borrower.state.PendingState;
 import com.p2plending.domain.lender.entity.Investment;
@@ -145,7 +148,39 @@ public class LoanAggregate {
     }
 
     /**
-     * Transition ke state baru (dipanggil oleh concrete states)
+     * Cancel loan dengan check 20% investment threshold untuk penalty.
+     * - Jika investment < 20%: no penalty
+     * - Jika investment >= 20%: apply penalty (counter+1, potentially block)
+     * Transition ke CANCELLED state.
+     */
+    public void cancelWithPenaltyCheck() {
+        LoanCancellationService cancellationService = new LoanCancellationService();
+        Money totalInvested = calculateTotalInvestment();
+
+        // Check apakah ada penalty (investment >= 20%)
+        boolean hasPenalty = cancellationService.shouldApplyPenalty(loan.getAmount(), totalInvested);
+
+        if (hasPenalty) {
+            // Increment cancellation count
+            int newCount = cancellationService.incrementCancellationCount(borrower.getCancellationCount());
+            borrower.setCancellationCount(newCount);
+
+            // Check apakah sudah 3x untuk set block
+            if (newCount >= 3) {
+                LocalDate blockUntil = cancellationService.calculateBlockUntilDate(LocalDate.now(), newCount);
+                borrower.setLastBlockedDate(blockUntil.atStartOfDay());
+            }
+        }
+
+        // Set cancellation date
+        loan.setCancelledDate(LocalDate.now().atStartOfDay());
+
+        // Transition ke CANCELLED state
+        transitionToState(new CancelledState());
+    }
+
+    /**
+     * Internal method untuk transition ke state baru
      */
     public void transitionToState(LoanState newState) {
         if (newState == null) {
