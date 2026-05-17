@@ -55,6 +55,24 @@ public class LoanAggregate {
     }
 
     /**
+     * Reconstruct an existing aggregate from repository
+     */
+    public static LoanAggregate load(LoanApplication loan, Borrower borrower) {
+        LoanAggregate aggregate = new LoanAggregate(loan, borrower);
+        // Determine state from existing loan status
+        switch (loan.getStatus()) {
+            case VERIFIED: aggregate.currentState = new com.p2plending.domain.borrower.state.VerifiedState(); break;
+            case FUNDING: aggregate.currentState = new com.p2plending.domain.borrower.state.FundingState(); break;
+            case FUNDED: aggregate.currentState = new com.p2plending.domain.borrower.state.FundedState(); break;
+            case DISBURSED: aggregate.currentState = new com.p2plending.domain.borrower.state.DisbursedState(); break;
+            case CANCELLED: aggregate.currentState = new com.p2plending.domain.borrower.state.CancelledState(); break;
+            case EXPIRED_FUNDING: aggregate.currentState = new com.p2plending.domain.borrower.state.ExpiredFundingState(); break;
+            default: aggregate.currentState = new PendingState(); break;
+        }
+        return aggregate;
+    }
+
+    /**
      * Validasi credit score borrower
      * 
      * @throws IllegalArgumentException if credit score < 600
@@ -187,6 +205,7 @@ public class LoanAggregate {
             throw new IllegalArgumentException("New state must not be null");
         }
         this.currentState = newState;
+        this.loan.updateStatus(newState.getStatus());
     }
 
     /**

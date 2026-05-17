@@ -62,6 +62,10 @@ public class LoanApplication {
         return status;
     }
 
+    public void updateStatus(LoanStatus newStatus) {
+        this.status = newStatus;
+    }
+
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }

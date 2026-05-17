@@ -102,7 +102,7 @@ class EndToEndFlowTest {
                 applyLoanUseCase = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
                 approveLoanUseCase = new ApproveLoanUseCaseImpl(loanRepo);
                 disburseUseCase = new DisburseUseCaseImpl(loanRepo);
-                cancelLoanUseCase = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService);
+                cancelLoanUseCase = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
                 registerLenderUseCase = new RegisterLenderUseCaseImpl(lenderRepo);
                 investLoanUseCase = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);
         }

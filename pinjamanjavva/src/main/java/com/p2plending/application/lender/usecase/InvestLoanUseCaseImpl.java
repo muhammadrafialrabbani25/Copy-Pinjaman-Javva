@@ -73,6 +73,16 @@ public class InvestLoanUseCaseImpl implements InvestLoanUseCase {
         // 8. Simpan investment
         investmentRepository.save(investment);
 
+        // 8.5. Load aggregate & existing investments, lalu tambahkan investment baru
+        com.p2plending.domain.borrower.aggregate.LoanAggregate aggregate = 
+            com.p2plending.domain.borrower.aggregate.LoanAggregate.load(loan, null);
+        java.util.List<Investment> existingInvestments = investmentRepository.findByLoanId(loan.getId());
+        for (Investment inv : existingInvestments) {
+            aggregate.addInvestmentInternal(inv);
+        }
+        aggregate.addInvestment(investment); // Ini akan mengecek funding complete dan bisa mengubah status
+        loanRepository.save(loan); // Simpan perubahan status jika ada
+
         // 9. Kurangi saldo lender
         Money newBalance = lender.getSaldo().subtract(investmentAmount);
         Lender updatedLender = new Lender(
