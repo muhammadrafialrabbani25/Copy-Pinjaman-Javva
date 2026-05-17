@@ -21,7 +21,7 @@ class LoanApprovalServiceTest {
         service = new LoanApprovalService();
     }
 
-    // ============ KTP Verification Tests ============
+    // KTP Verification Tests
 
     @Test
     void testVerifyValidKTP() {
@@ -44,7 +44,7 @@ class LoanApprovalServiceTest {
         assertFalse(result, "Null KTP should fail verification");
     }
 
-    // ============ Loan Limit Calculation Tests ============
+    // Loan Limit Calculation Tests
 
     @Test
     void testCalculateLoanLimit_Basic() {
@@ -85,7 +85,7 @@ class LoanApprovalServiceTest {
                 "Loan limit should be 3x salary");
     }
 
-    // ============ Credit Score Verification Tests ============
+    // Credit Score Verification Tests
 
     @Test
     void testVerifyValidCreditScore_Minimum() {

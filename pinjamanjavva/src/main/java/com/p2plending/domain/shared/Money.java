@@ -7,7 +7,7 @@ public class Money {
     private final String currency;
 
     public Money(BigDecimal amount, String currency) {
-        if (amount.compareTo(BigDecimal.ZERO) < 0 ){
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("uang anda harus lebih dari 0");
         }
         this.amount = amount;
@@ -26,7 +26,7 @@ public class Money {
         return currency;
     }
 
-    public Money add(Money other){
+    public Money add(Money other) {
         return new Money(this.amount.add(other.getAmount()), this.currency);
     }
 
@@ -40,8 +40,15 @@ public class Money {
         return new Money(result, this.currency);
     }
 
-    public boolean isGreaterThanOrEqual(Money other){
+    public boolean isGreaterThanOrEqual(Money other) {
         return this.amount.compareTo(other.getAmount()) >= 0;
+    }
+
+    public Money multiply(BigDecimal multiplier) {
+        if (multiplier == null) {
+            throw new IllegalArgumentException("Multiplier must not be null");
+        }
+        return new Money(this.amount.multiply(multiplier), this.currency);
     }
 
     @Override
@@ -74,6 +81,5 @@ public class Money {
             return false;
         return true;
     }
-    
-    
+
 }
