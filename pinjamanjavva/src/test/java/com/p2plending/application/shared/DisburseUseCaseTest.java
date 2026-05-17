@@ -33,11 +33,7 @@ class DisburseUseCaseTest {
         DisburseLoanCommand command = new DisburseLoanCommand(loanId);
         
         LoanApplication mockLoan = new LoanApplication(loanId, "BOR-1", new Money(new BigDecimal("1000000"), "IDR"), Tenor.ONE_MONTH, 700);
-        
-        // Use reflection to set status to FUNDED
-        java.lang.reflect.Field field = LoanApplication.class.getDeclaredField("status");
-        field.setAccessible(true);
-        field.set(mockLoan, LoanStatus.FUNDED);
+        mockLoan.updateStatus(LoanStatus.FUNDED);
 
         when(loanRepository.findById(loanId)).thenReturn(Optional.of(mockLoan));
 

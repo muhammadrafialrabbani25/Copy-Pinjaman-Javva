@@ -67,6 +67,7 @@ com\p2plending\domain\shared\Money.class
 com\p2plending\application\lender\dto\InvestCommand.class
 com\p2plending\application\lender\usecase\RegisterLenderUseCaseImpl.class
 com\p2plending\application\lender\usecase\RegisterLenderUseCase.class
+com\p2plending\domain\borrower\aggregate\LoanAggregate$1.class
 com\p2plending\domain\borrower\state\VerifiedState.class
 com\p2plending\application\borrower\service\BorrowerApplicationService.class
 com\p2plending\application\shared\ApproveLoanUseCase.class

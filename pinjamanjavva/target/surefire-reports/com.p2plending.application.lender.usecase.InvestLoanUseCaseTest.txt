@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.p2plending.application.lender.usecase.InvestLoanUseCaseTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.133 s -- in com.p2plending.application.lender.usecase.InvestLoanUseCaseTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in com.p2plending.application.lender.usecase.InvestLoanUseCaseTest

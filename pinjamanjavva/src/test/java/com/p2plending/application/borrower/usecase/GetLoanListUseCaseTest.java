@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.lang.reflect.Field;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,7 +45,7 @@ public class GetLoanListUseCaseTest {
             new Money(BigDecimal.valueOf(5000000), "IDR"),
             "Pegawai", 750
         );
-        setCancellationCount(borrower, 2);
+        borrower.setCancellationCount(2);
 
         LoanApplication loan1 = new LoanApplication(
             "LN001", "BR001", new Money(BigDecimal.valueOf(10000000), "IDR"), Tenor.TWELVE_MONTHS, 750
@@ -87,13 +87,5 @@ public class GetLoanListUseCaseTest {
         verify(loanRepository).findByBorrowerId("BR999");
     }
 
-    private void setCancellationCount(Borrower borrower, int count) {
-        try {
-            Field field = Borrower.class.getDeclaredField("cancellationCount");
-            field.setAccessible(true);
-            field.set(borrower, count);
-        } catch (Exception e) {
-            throw new RuntimeException("Gagal set cancellationCount", e);
-        }
-    }
+
 }

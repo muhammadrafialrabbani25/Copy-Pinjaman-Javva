@@ -36,6 +36,9 @@ public class CancelLoanUseCaseTest {
     @Mock
     private LoanCancellationService loanCancellationService;
 
+    @Mock
+    private com.p2plending.domain.lender.repository.InvestmentRepository investmentRepository;
+
     @InjectMocks
     private CancelLoanUseCaseImpl cancelLoanUseCase;
 
@@ -50,12 +53,21 @@ public class CancelLoanUseCaseTest {
         LoanApplication loan = new LoanApplication(
             "LN001", "BR001", new Money(BigDecimal.valueOf(10000000), "IDR"), Tenor.TWELVE_MONTHS, 750
         );
-        setLoanStatus(loan,LoanStatus.FUNDING);
+        loan.updateStatus(LoanStatus.FUNDING);
         
         when(borrowerRepository.findById("BR001")).thenReturn(Optional.of(borrower));
         when(loanRepository.findById("LN001")).thenReturn(Optional.of(loan));
+        
+        // Provide an investment of 2,000,000 to trigger the 20% penalty rule (loan is 10,000,000)
+        com.p2plending.domain.lender.entity.Investment investment = new com.p2plending.domain.lender.entity.Investment(
+            "INV001", "LD001", "LN001", new Money(BigDecimal.valueOf(2000000), "IDR")
+        );
+        when(investmentRepository.findByLoanId("LN001")).thenReturn(java.util.Collections.singletonList(investment));
+        
         when(loanCancellationService.canCancelLoan(any(Money.class), any(Money.class), anyInt())).thenReturn(true);
-        when(loanCancellationService.incrementCancellationCount(anyInt())).thenReturn(1);
+        // Note: loanCancellationService inside LoanAggregate is not mocked, it's instantiated inside the method.
+        // The mock below is only used by the canCancelLoan check in the use case if it uses it.
+        // No need to mock shouldApplyPenalty or incrementCancellationCount because they are ignored by the aggregate.
 
         cancelLoanUseCase.execute(command);
 
@@ -68,14 +80,15 @@ public class CancelLoanUseCaseTest {
         assertEquals(1, borrowerCaptor.getValue().getCancellationCount());
         assertEquals(LoanStatus.CANCELLED, loanCaptor.getValue().getStatus());
         assertNotNull(loanCaptor.getValue().getCancelledDate());    
-}
+    }
+
     @Test
     void shouldRejectCancellationWhenLoanCannotBeCancelled() {
         CancelLoanCommand command = new CancelLoanCommand(
-    "BR001",
-    "LN001",
-    new Money(BigDecimal.valueOf(2000000), "IDR")
-);
+            "BR001",
+            "LN001",
+            new Money(BigDecimal.valueOf(2000000), "IDR")
+        );
 
         KTP ktp = new KTP("Luis", "3304031709846920");
         Money gaji = new Money(BigDecimal.valueOf(5000000), "IDR");
@@ -84,26 +97,17 @@ public class CancelLoanUseCaseTest {
         LoanApplication loan = new LoanApplication(
             "LN001", "BR001", new Money(BigDecimal.valueOf(10000000), "IDR"), Tenor.TWELVE_MONTHS, 750
         );
-        setLoanStatus(loan,LoanStatus.FUNDING);
+        loan.updateStatus(LoanStatus.FUNDING);
 
         when(borrowerRepository.findById("BR001")).thenReturn(Optional.of(borrower));
         when(loanRepository.findById("LN001")).thenReturn(Optional.of(loan));
         when(loanCancellationService.canCancelLoan(any(Money.class), any(Money.class), anyInt())).thenReturn(false);
 
-       assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             cancelLoanUseCase.execute(command);
         });
 
         verify(borrowerRepository, never()).save(any());
         verify(loanRepository, never()).save(any());
-    }
-    private void setLoanStatus(LoanApplication loan, LoanStatus status) {
-    try {
-        Field statusField = LoanApplication.class.getDeclaredField("status");
-        statusField.setAccessible(true);
-        statusField.set(loan, status);
-    } catch (Exception e) {
-        throw new RuntimeException("Gagal set status", e);
-        }
     }
 }

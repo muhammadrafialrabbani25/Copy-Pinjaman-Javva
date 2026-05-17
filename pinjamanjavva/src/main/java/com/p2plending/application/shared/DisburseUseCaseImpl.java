@@ -4,7 +4,6 @@ import com.p2plending.domain.borrower.entity.LoanApplication;
 import com.p2plending.domain.borrower.repository.LoanRepository;
 import com.p2plending.domain.shared.LoanStatus;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 
 public class DisburseUseCaseImpl implements DisburseUseCase {
@@ -28,18 +27,10 @@ public class DisburseUseCaseImpl implements DisburseUseCase {
             throw new IllegalStateException("Hanya loan dengan status FUNDED yang dapat di-disburse");
         }
 
-        setLoanStatus(loan, LoanStatus.DISBURSED);
+        com.p2plending.domain.borrower.aggregate.LoanAggregate aggregate = 
+            com.p2plending.domain.borrower.aggregate.LoanAggregate.load(loan, null);
+        aggregate.disburse();
         
         loanRepository.save(loan);
-    }
-
-    private void setLoanStatus(LoanApplication loan, LoanStatus status) {
-        try {
-            Field field = LoanApplication.class.getDeclaredField("status");
-            field.setAccessible(true);
-            field.set(loan, status);
-        } catch (Exception e) {
-            throw new RuntimeException("Gagal set status loan", e);
-        }
     }
 }

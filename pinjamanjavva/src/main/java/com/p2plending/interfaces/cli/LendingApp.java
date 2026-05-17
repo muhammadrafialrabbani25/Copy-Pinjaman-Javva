@@ -52,7 +52,7 @@ public class LendingApp {
     private static final ApplyLoanUseCaseImpl      applyLoanUseCase        = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
     private static final ApproveLoanUseCaseImpl    approveLoanUseCase      = new ApproveLoanUseCaseImpl(loanRepo);
     private static final DisburseUseCaseImpl       disburseUseCase         = new DisburseUseCaseImpl(loanRepo);
-    private static final CancelLoanUseCaseImpl     cancelLoanUseCase       = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService);
+    private static final CancelLoanUseCaseImpl     cancelLoanUseCase       = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
     private static final RegisterLenderUseCaseImpl registerLenderUseCase   = new RegisterLenderUseCaseImpl(lenderRepo);
     private static final TopUpSaldoUseCaseImpl     topUpSaldoUseCase       = new TopUpSaldoUseCaseImpl(lenderRepo);
     private static final InvestLoanUseCaseImpl     investLoanUseCase       = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);

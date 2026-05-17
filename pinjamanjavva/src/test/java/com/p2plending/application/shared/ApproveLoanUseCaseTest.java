@@ -88,10 +88,8 @@ class ApproveLoanUseCaseTest {
         
         LoanApplication mockLoan = new LoanApplication(loanId, "BOR-1", new Money(new BigDecimal("1000000"), "IDR"), Tenor.ONE_MONTH, 700);
         
-        // Use reflection to set status to FUNDING
-        java.lang.reflect.Field field = LoanApplication.class.getDeclaredField("status");
-        field.setAccessible(true);
-        field.set(mockLoan, LoanStatus.FUNDING);
+        // Use updateStatus instead of reflection
+        mockLoan.updateStatus(LoanStatus.FUNDING);
 
         when(loanRepository.findById(loanId)).thenReturn(Optional.of(mockLoan));
 

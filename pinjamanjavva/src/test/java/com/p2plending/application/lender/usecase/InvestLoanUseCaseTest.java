@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -57,18 +57,20 @@ public class InvestLoanUseCaseTest {
         LoanApplication loan = new LoanApplication(
             "LN001", "BR001", new Money(BigDecimal.valueOf(10000000), "IDR"), Tenor.TWELVE_MONTHS, 750
         );
-        setLoanStatus(loan, LoanStatus.FUNDING);
+        loan.updateStatus(LoanStatus.FUNDING);
 
         InvestCommand command = new InvestCommand("LD001", "LN001", BigDecimal.valueOf(2000000));
 
         when(lenderRepository.findById("LD001")).thenReturn(Optional.of(lender));
         when(loanRepository.findById("LN001")).thenReturn(Optional.of(loan));
         when(investmentService.validateMinimumInvestment(any(), any())).thenReturn(true);
+        when(investmentRepository.findByLoanId("LN001")).thenReturn(java.util.Collections.emptyList());
         when(lenderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         investLoanUseCase.execute(command);
 
         verify(investmentRepository).save(any(Investment.class));
+        verify(loanRepository).save(any(LoanApplication.class));
         verify(lenderRepository).save(any(Lender.class));
     }
 
@@ -113,7 +115,7 @@ public class InvestLoanUseCaseTest {
         LoanApplication loan = new LoanApplication(
             "LN001", "BR001", new Money(BigDecimal.valueOf(10000000), "IDR"), Tenor.TWELVE_MONTHS, 750
         );
-        setLoanStatus(loan, LoanStatus.PENDING);
+        loan.updateStatus(LoanStatus.PENDING);
 
         InvestCommand command = new InvestCommand("LD001", "LN001", BigDecimal.valueOf(2000000));
 
@@ -136,7 +138,7 @@ public class InvestLoanUseCaseTest {
         LoanApplication loan = new LoanApplication(
             "LN001", "BR001", new Money(BigDecimal.valueOf(10000000), "IDR"), Tenor.TWELVE_MONTHS, 750
         );
-        setLoanStatus(loan, LoanStatus.FUNDING);
+        loan.updateStatus(LoanStatus.FUNDING);
 
         InvestCommand command = new InvestCommand("LD001", "LN001", BigDecimal.valueOf(5000000));
 
@@ -148,13 +150,5 @@ public class InvestLoanUseCaseTest {
         verify(investmentRepository, never()).save(any());
     }
 
-    private void setLoanStatus(LoanApplication loan, LoanStatus status) {
-        try {
-            Field field = LoanApplication.class.getDeclaredField("status");
-            field.setAccessible(true);
-            field.set(loan, status);
-        } catch (Exception e) {
-            throw new RuntimeException("Gagal set status", e);
-        }
-    }
+
 }
