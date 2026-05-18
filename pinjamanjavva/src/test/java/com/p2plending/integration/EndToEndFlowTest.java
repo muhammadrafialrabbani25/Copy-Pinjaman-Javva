@@ -17,6 +17,7 @@ import com.p2plending.application.shared.ApproveLoanCommand;
 import com.p2plending.application.shared.ApproveLoanUseCaseImpl;
 import com.p2plending.application.shared.DisburseLoanCommand;
 import com.p2plending.application.shared.DisburseUseCaseImpl;
+import com.p2plending.domain.borrower.aggregate.LoanAggregate;
 import com.p2plending.domain.borrower.entity.Borrower;
 import com.p2plending.domain.borrower.entity.LoanApplication;
 import com.p2plending.domain.borrower.service.LoanApprovalService;
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,461 +46,401 @@ import static org.junit.jupiter.api.Assertions.*;
  * End-to-End Integration Test — P2P Lending Platform
  *
  * Menggunakan real in-memory repositories (NO mocks).
- * Setiap test dibuat independent via @BeforeEach yang clear SharedStorage.
+ * Setiap test independen via @BeforeEach yang clear SharedStorage.
  *
- * Skenario yang diuji:
- * 1. Happy path : apply → approve → invest → funded → disburse
+ * Skenario:
+ * 1. Happy path   : apply → approve → invest → FUNDED (otomatis) → disburse
  * 2. Cancellation : apply → approve → invest → cancel (counter +1)
- * 2b. 3x cancel : borrower diblokir 4 bulan setelah 3x cancel
- * 3. Expired : apply → approve → tidak terfund → EXPIRED_FUNDING
- * Edge cases : reject oleh admin, cancel dengan funded < 20%
+ * 2b. 3x cancel   : borrower diblokir 4 bulan
+ * 3. Expired      : apply → approve → expireFunding() → EXPIRED_FUNDING
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EndToEndFlowTest {
 
-        // ─── Repositories ─────────────────────────────────────────────────
-        private InMemoryBorrowerRepository borrowerRepo;
-        private InMemoryLoanRepository loanRepo;
-        private InMemoryLenderRepository lenderRepo;
-        private InMemoryInvestmentRepository investmentRepo;
+    // ─── Repositories ─────────────────────────────────────────────────
+    private InMemoryBorrowerRepository borrowerRepo;
+    private InMemoryLoanRepository loanRepo;
+    private InMemoryLenderRepository lenderRepo;
+    private InMemoryInvestmentRepository investmentRepo;
 
-        // ─── Use Cases ────────────────────────────────────────────────────
-        private RegisterBorrowerUseCase registerBorrowerUseCase;
-        private ApplyLoanUseCaseImpl applyLoanUseCase;
-        private ApproveLoanUseCaseImpl approveLoanUseCase;
-        private DisburseUseCaseImpl disburseUseCase;
-        private CancelLoanUseCaseImpl cancelLoanUseCase;
-        private RegisterLenderUseCaseImpl registerLenderUseCase;
-        private InvestLoanUseCaseImpl investLoanUseCase;
+    // ─── Use Cases ────────────────────────────────────────────────────
+    private RegisterBorrowerUseCase registerBorrowerUseCase;
+    private ApplyLoanUseCaseImpl applyLoanUseCase;
+    private ApproveLoanUseCaseImpl approveLoanUseCase;
+    private DisburseUseCaseImpl disburseUseCase;
+    private CancelLoanUseCaseImpl cancelLoanUseCase;
+    private RegisterLenderUseCaseImpl registerLenderUseCase;
+    private InvestLoanUseCaseImpl investLoanUseCase;
 
-        // ─── Test Data Constants ───────────────────────────────────────────
-        private static final String KTP_IMAN = "1111222233334444";
-        private static final String KTP_BUDI = "5555666677778888";
-        private static final String KTP_KEMAL = "3333444455556666";
+    // ─── Test Data Constants ───────────────────────────────────────────
+    private static final String KTP_IMAN  = "1111222233334444";
+    private static final String KTP_BUDI  = "5555666677778888";
+    private static final String KTP_KEMAL = "3333444455556666";
 
-        @BeforeEach
-        void setUp() {
-                // Bersihkan SharedStorage supaya setiap test independen
-                SharedStorage.getInstance().getBorrowers().clear();
-                SharedStorage.getInstance().getLoans().clear();
-                SharedStorage.getInstance().getLenders().clear();
-                SharedStorage.getInstance().getInvestments().clear();
+    @BeforeEach
+    void setUp() {
+        SharedStorage.getInstance().getBorrowers().clear();
+        SharedStorage.getInstance().getLoans().clear();
+        SharedStorage.getInstance().getLenders().clear();
+        SharedStorage.getInstance().getInvestments().clear();
 
-                // Inisialisasi repositories (semuanya point ke SharedStorage yang sudah bersih)
-                borrowerRepo = new InMemoryBorrowerRepository();
-                loanRepo = new InMemoryLoanRepository();
-                lenderRepo = new InMemoryLenderRepository();
-                investmentRepo = new InMemoryInvestmentRepository();
+        borrowerRepo   = new InMemoryBorrowerRepository();
+        loanRepo       = new InMemoryLoanRepository();
+        lenderRepo     = new InMemoryLenderRepository();
+        investmentRepo = new InMemoryInvestmentRepository();
 
-                // Domain services
-                LoanApprovalService loanApprovalService = new LoanApprovalService();
-                LoanCancellationService loanCancellationService = new LoanCancellationService();
-                InvestmentService investmentService = new InvestmentService();
+        LoanApprovalService     loanApprovalService     = new LoanApprovalService();
+        LoanCancellationService loanCancellationService = new LoanCancellationService();
+        InvestmentService       investmentService       = new InvestmentService();
 
-                // Use cases
-                registerBorrowerUseCase = new RegisterBorrowerUseCase(borrowerRepo);
-                applyLoanUseCase = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
-                approveLoanUseCase = new ApproveLoanUseCaseImpl(loanRepo);
-                disburseUseCase = new DisburseUseCaseImpl(loanRepo);
-                cancelLoanUseCase = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
-                registerLenderUseCase = new RegisterLenderUseCaseImpl(lenderRepo);
-                investLoanUseCase = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);
+        registerBorrowerUseCase = new RegisterBorrowerUseCase(borrowerRepo);
+        applyLoanUseCase        = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
+        approveLoanUseCase      = new ApproveLoanUseCaseImpl(loanRepo);
+        disburseUseCase         = new DisburseUseCaseImpl(loanRepo);
+        cancelLoanUseCase       = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
+        registerLenderUseCase   = new RegisterLenderUseCaseImpl(lenderRepo);
+        investLoanUseCase       = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // SKENARIO 1 — HAPPY PATH
+    // ═════════════════════════════════════════════════════════════════
+
+    @Test
+    @Order(1)
+    @DisplayName("Skenario 1: Happy path — loan berhasil dicairkan (DISBURSED)")
+    void scenario1_happyPath_loanSuccessfullyDisbursed() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 750));
+        assertNotNull(iman.getId());
+        assertEquals("Iman Santoso", iman.getNama());
+
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+        assertNotNull(loan.getId());
+        assertEquals(LoanStatus.PENDING, getLoanStatus(loan.getId()));
+
+        // Approve → FUNDING via State Pattern (PENDING → VERIFIED → FUNDING)
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+        assertEquals(LoanStatus.FUNDING, getLoanStatus(loan.getId()));
+
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+        assertEquals(new BigDecimal("50000000"), budi.getSaldo());
+
+        // Invest 30jt (100%) → State Pattern otomatis transisi ke FUNDED
+        // via FundingState.addInvestment() → checkFundingComplete() → FundedState
+        investLoanUseCase.execute(
+                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("30000000")));
+
+        BigDecimal saldoBudiSetelah = lenderRepo.findById(budi.getId()).get().getSaldo().getAmount();
+        assertEquals(new BigDecimal("20000000"), saldoBudiSetelah,
+                "Saldo BUDI harus berkurang 30jt");
+
+        // FUNDED sudah otomatis — tidak perlu forceSet
+        assertEquals(LoanStatus.FUNDED, getLoanStatus(loan.getId()),
+                "Status harus FUNDED otomatis setelah invest 100%");
+
+        // Disburse → FUNDED → DISBURSED via State Pattern
+        disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
+        assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()));
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Skenario 1b: Admin reject loan → status CANCELLED")
+    void scenario1b_adminRejectLoan_statusCancelled() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 700));
+
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 20_000_000L, 6));
+
+        // Reject → CANCELLED via State Pattern (PENDING → CANCELLED)
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), false));
+        assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()));
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // SKENARIO 2 — CANCELLATION
+    // ═════════════════════════════════════════════════════════════════
+
+    @Test
+    @Order(3)
+    @DisplayName("Skenario 2: Borrower cancel loan → status CANCELLED, counter +1")
+    void scenario2_cancellation_counterIncremented() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 700));
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("20000000")));
+
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 30_000_000L, 3));
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+
+        // Invest tepat 20% (6jt dari 30jt) → tidak cukup untuk auto-FUNDED
+        investLoanUseCase.execute(
+                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+
+        int countBefore = getCancellationCount(iman.getId());
+        assertEquals(0, countBefore);
+
+        // Cancel → CANCELLED via LoanCancellationService + State Pattern
+        cancelLoanUseCase.execute(new CancelLoanCommand(
+                iman.getId(), loan.getId(), new Money(new BigDecimal("6000000"), "IDR")));
+
+        assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()));
+
+        LoanApplication cancelledLoan = loanRepo.findById(loan.getId()).get();
+        assertNotNull(cancelledLoan.getCancelledDate(), "cancelledDate harus diisi");
+
+        int countAfter = getCancellationCount(iman.getId());
+        assertEquals(countBefore + 1, countAfter, "Counter harus naik +1");
+
+        Borrower borrower = borrowerRepo.findById(iman.getId()).get();
+        assertNull(borrower.getLastBlockedDate(), "Belum diblokir (baru 1x cancel)");
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Skenario 2b: 3x cancel → borrower diblokir 4 bulan")
+    void scenario2b_threeTimesCancel_borrowerBlocked() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 750));
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("100000000")));
+
+        for (int i = 1; i <= 3; i++) {
+            LoanDTO loan = applyLoanUseCase.execute(
+                    new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+            approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+            investLoanUseCase.execute(
+                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+            cancelLoanUseCase.execute(new CancelLoanCommand(
+                    iman.getId(), loan.getId(), new Money(new BigDecimal("6000000"), "IDR")));
+
+            assertEquals(i, getCancellationCount(iman.getId()),
+                    "Setelah cancel ke-" + i + ", count harus " + i);
         }
 
-        // ═════════════════════════════════════════════════════════════════
-        // SKENARIO 1 — HAPPY PATH
-        // ═════════════════════════════════════════════════════════════════
+        Borrower borrowerAfter = borrowerRepo.findById(iman.getId()).get();
+        assertNotNull(borrowerAfter.getLastBlockedDate(),
+                "Borrower harus diblokir setelah 3x cancel");
+        assertEquals(3, borrowerAfter.getCancellationCount());
+    }
 
-        @Test
-        @Order(1)
-        @DisplayName("Skenario 1: Happy path — loan berhasil dicairkan (DISBURSED)")
-        void scenario1_happyPath_loanSuccessfullyDisbursed() {
-                // ── Register IMAN (gaji 10jt → limit 30jt) ───────────────────
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 750));
-                assertNotNull(iman.getId(), "Borrower harus mendapat ID");
-                assertEquals("Iman Santoso", iman.getNama());
+    @Test
+    @Order(5)
+    @DisplayName("Skenario 2c: Cancel BISA jika funded < 20% — tanpa penalty")
+    void scenario2c_canCancel_ifFundedLessThan20Percent_NoPenalty() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 700));
 
-                // ── IMAN apply loan 30jt ──────────────────────────────────────
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                assertNotNull(loan.getId());
-                assertEquals(30_000_000L, loan.getAmount());
-                assertEquals(6, loan.getTermInMonths());
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
-                // Status awal harus PENDING
-                assertEquals(LoanStatus.PENDING, getLoanStatus(loan.getId()));
+        // funded 5jt < 20% threshold (6jt) → cancel dibolehkan tanpa penalty
+        cancelLoanUseCase.execute(new CancelLoanCommand(
+                iman.getId(), loan.getId(), new Money(new BigDecimal("5000000"), "IDR")));
 
-                // ── Admin approve → FUNDING ───────────────────────────────────
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-                assertEquals(LoanStatus.FUNDING, getLoanStatus(loan.getId()),
-                                "Setelah approve, status harus FUNDING");
+        assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()));
+    }
 
-                // ── Register BUDI (saldo 50jt) ────────────────────────────────
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
-                assertNotNull(budi.getId());
-                assertEquals(new BigDecimal("50000000"), budi.getSaldo());
+    @Test
+    @Order(6)
+    @DisplayName("Skenario 2d: Cancel tidak bisa setelah 3x cancel (blokir)")
+    void scenario2d_cannotCancel_afterMaxCancellations() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 750));
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("200000000")));
 
-                // ── BUDI invest 30jt (100% loan amount) ──────────────────────
-                investLoanUseCase.execute(
-                                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("30000000")));
-
-                // Saldo BUDI berkurang 30jt
-                BigDecimal saldoBudiSetelah = lenderRepo.findById(budi.getId()).get().getSaldo().getAmount();
-                assertEquals(new BigDecimal("20000000"), saldoBudiSetelah,
-                                "Saldo BUDI harus berkurang 30jt (50jt - 30jt = 20jt)");
-
-                // ── Set FUNDED (simulasi: 100% terfund) ──────────────────────
-                forceSetLoanStatus(loan.getId(), LoanStatus.FUNDED);
-                assertEquals(LoanStatus.FUNDED, getLoanStatus(loan.getId()));
-
-                // ── Admin disburse ────────────────────────────────────────────
-                disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-                assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()),
-                                "Setelah disburse, status harus DISBURSED");
+        for (int i = 0; i < 3; i++) {
+            LoanDTO l = applyLoanUseCase.execute(
+                    new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+            approveLoanUseCase.execute(new ApproveLoanCommand(l.getId(), true));
+            investLoanUseCase.execute(
+                    new InvestCommand(budi.getId(), l.getId(), new BigDecimal("6000000")));
+            cancelLoanUseCase.execute(new CancelLoanCommand(
+                    iman.getId(), l.getId(), new Money(new BigDecimal("6000000"), "IDR")));
         }
 
-        @Test
-        @Order(2)
-        @DisplayName("Skenario 1b: Admin reject loan → status CANCELLED")
-        void scenario1b_adminRejectLoan_statusCancelled() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 700));
+        Borrower blockedBorrower = borrowerRepo.findById(iman.getId()).get();
+        assertEquals(3, blockedBorrower.getCancellationCount());
+        assertNotNull(blockedBorrower.getLastBlockedDate(), "Borrower harus diblokir");
+    }
 
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 20_000_000L, 6));
+    // ═════════════════════════════════════════════════════════════════
+    // SKENARIO 3 — EXPIRED FUNDING
+    // ═════════════════════════════════════════════════════════════════
 
-                // Admin reject (approve = false)
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), false));
+    @Test
+    @Order(7)
+    @DisplayName("Skenario 3: Loan tidak terfund → EXPIRED_FUNDING via State Pattern")
+    void scenario3_expiredFunding_statusSetCorrectly() {
+        BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Kemal Peminjam", "085555555555", KTP_KEMAL,
+                "Jl. Kuningan No. 7", 5_000_000L, 650));
 
-                assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()),
-                                "Loan yang direject admin harus berstatus CANCELLED");
-        }
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
 
-        // ═════════════════════════════════════════════════════════════════
-        // SKENARIO 2 — CANCELLATION
-        // ═════════════════════════════════════════════════════════════════
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+        assertEquals(LoanStatus.FUNDING, getLoanStatus(loan.getId()));
 
-        @Test
-        @Order(3)
-        @DisplayName("Skenario 2: Borrower cancel loan → status CANCELLED, counter +1")
-        void scenario2_cancellation_counterIncremented() {
-                // Setup
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 700));
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("20000000")));
+        // Simulasi 5 hari berlalu → FUNDING → EXPIRED_FUNDING via State Pattern
+        expireLoanFunding(loan.getId());
+        assertEquals(LoanStatus.EXPIRED_FUNDING, getLoanStatus(loan.getId()));
+    }
 
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 30_000_000L, 3));
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+    @Test
+    @Order(8)
+    @DisplayName("Skenario 3b: Loan EXPIRED tidak bisa di-disburse")
+    void scenario3b_expiredLoan_cannotBeDisbursed() {
+        BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Kemal Peminjam", "085555555555", KTP_KEMAL,
+                "Jl. Kuningan No. 7", 5_000_000L, 650));
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
-                // BUDI invest tepat 20% (6jt dari 30jt)
-                investLoanUseCase.execute(
-                                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+        expireLoanFunding(loan.getId());
 
-                // Cancellation count sebelum
-                int countBefore = getCancellationCount(iman.getId());
-                assertEquals(0, countBefore, "Cancellation count awal harus 0");
+        assertThrows(IllegalStateException.class,
+                () -> disburseUseCase.execute(new DisburseLoanCommand(loan.getId())),
+                "Loan expired tidak bisa di-disburse");
+    }
 
-                // IMAN cancel loan
-                Money funded = new Money(new BigDecimal("6000000"), "IDR");
-                cancelLoanUseCase.execute(new CancelLoanCommand(iman.getId(), loan.getId(), funded));
+    @Test
+    @Order(9)
+    @DisplayName("Skenario 3c: Loan EXPIRED tidak bisa di-approve ulang")
+    void scenario3c_expiredLoan_cannotBeReapproved() {
+        BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Kemal Peminjam", "085555555555", KTP_KEMAL,
+                "Jl. Kuningan No. 7", 5_000_000L, 650));
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
-                // Verify loan status = CANCELLED
-                assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()),
-                                "Status loan harus CANCELLED setelah dibatalkan");
+        expireLoanFunding(loan.getId());
 
-                // Verify cancelledDate diisi
-                LoanApplication cancelledLoan = loanRepo.findById(loan.getId()).get();
-                assertNotNull(cancelledLoan.getCancelledDate(),
-                                "cancelledDate harus diisi saat cancel");
+        assertThrows(IllegalStateException.class,
+                () -> approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true)),
+                "Loan expired tidak bisa di-approve ulang");
+    }
 
-                // Verify cancellation count naik +1
-                int countAfter = getCancellationCount(iman.getId());
-                assertEquals(countBefore + 1, countAfter,
-                                "Cancellation count harus naik dari " + countBefore + " → " + (countBefore + 1));
+    // ═════════════════════════════════════════════════════════════════
+    // Edge Cases
+    // ═════════════════════════════════════════════════════════════════
 
-                // Belum diblokir (baru 1x cancel)
-                Borrower borrower = borrowerRepo.findById(iman.getId()).get();
-                assertNull(borrower.getLastBlockedDate(),
-                                "Borrower belum diblokir karena baru 1x cancel (butuh 3x)");
-        }
+    @Test
+    @Order(10)
+    @DisplayName("Edge case: Lender invest < 20% dari loan → ditolak")
+    void edgeCase_investLessThan20Percent_rejected() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 700));
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("20000000")));
 
-        @Test
-        @Order(4)
-        @DisplayName("Skenario 2b: 3x cancel → borrower diblokir 4 bulan")
-        void scenario2b_threeTimesCancel_borrowerBlocked() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 750));
-                // Lender dengan saldo besar untuk 3x invest
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("100000000")));
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
-                // Lakukan 3x siklus: apply → approve → invest → cancel
-                for (int i = 1; i <= 3; i++) {
-                        LoanDTO loan = applyLoanUseCase.execute(
-                                        new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-                        investLoanUseCase.execute(
-                                        new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+        // 5jt < 20% dari 30jt (threshold = 6jt) → harus ditolak
+        assertThrows(IllegalArgumentException.class,
+                () -> investLoanUseCase.execute(
+                        new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("5000000"))));
+    }
 
-                        Money funded = new Money(new BigDecimal("6000000"), "IDR");
-                        cancelLoanUseCase.execute(
-                                        new CancelLoanCommand(iman.getId(), loan.getId(), funded));
+    @Test
+    @Order(11)
+    @DisplayName("Edge case: Lender saldo tidak cukup → invest ditolak")
+    void edgeCase_insufficientSaldo_investRejected() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 700));
+        // BUDI hanya punya 5jt, padahal min invest 6jt
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("5000000")));
 
-                        assertEquals(i, getCancellationCount(iman.getId()),
-                                        "Setelah cancel ke-" + i + ", count harus " + i);
-                }
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
-                // Setelah 3x cancel → borrower diblokir
-                Borrower borrowerAfter = borrowerRepo.findById(iman.getId()).get();
-                assertNotNull(borrowerAfter.getLastBlockedDate(),
-                                "Borrower harus diblokir (lastBlockedDate diisi) setelah 3x cancel");
-                assertEquals(3, borrowerAfter.getCancellationCount());
-        }
+        assertThrows(IllegalArgumentException.class,
+                () -> investLoanUseCase.execute(
+                        new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000"))));
+    }
 
-        @Test
-        @Order(5)
-        @DisplayName("Skenario 2c: Cancel BISA jika funded < 20% tanpa penalty/mark")
-        void scenario2c_canCancel_ifFundedLessThan20Percent_NoPenalty() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 700));
+    @Test
+    @Order(12)
+    @DisplayName("Edge case: Invest ke loan bukan status FUNDING → ditolak")
+    void edgeCase_investToNonFundingLoan_rejected() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 700));
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
 
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
+        // Belum di-approve → masih PENDING
 
-                // Funded hanya 5jt → kurang dari 20% (threshold = 6jt)
-                // Cancel sebelum 20% DIBOLEHKAN tanpa penalty
-                Money lessThan20Pct = new Money(new BigDecimal("5000000"), "IDR");
+        assertThrows(IllegalArgumentException.class,
+                () -> investLoanUseCase.execute(
+                        new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("10000000"))));
+    }
 
-                // Should NOT throw exception - cancel allowed with no penalty
-                cancelLoanUseCase.execute(
-                                new CancelLoanCommand(iman.getId(), loan.getId(), lessThan20Pct));
+    @Test
+    @Order(13)
+    @DisplayName("Edge case: Borrower tidak ditemukan saat apply → exception")
+    void edgeCase_borrowerNotFound_applyLoan() {
+        assertThrows(IllegalArgumentException.class,
+                () -> applyLoanUseCase.execute(
+                        new ApplyLoanCommand("BORROWER-TIDAK-ADA", 10_000_000L, 6)));
+    }
 
-                // Status loan berubah ke CANCELLED
-                assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()),
-                                "Status loan harus berubah ke CANCELLED");
-                // No penalty applied (cancellation count not incremented) - verified via
-                // LoanCancellationServiceTest
-        }
+    // ═════════════════════════════════════════════════════════════════
+    // Helper Methods
+    // ═════════════════════════════════════════════════════════════════
 
-        @Test
-        @Order(6)
-        @DisplayName("Skenario 2d: Cancel tidak bisa jika sudah 3x cancel (blokir)")
-        void scenario2d_cannotCancel_afterMaxCancellations() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 750));
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("200000000")));
+    /**
+     * Trigger expireFunding via State Pattern (FUNDING → EXPIRED_FUNDING).
+     * Menggantikan reflection hack — sekarang lewat LoanAggregate.expireFunding()
+     * yang delegate ke FundingState → transitionToState(new ExpiredFundingState()).
+     */
+    private void expireLoanFunding(String loanId) {
+        LoanApplication loan = loanRepo.findById(loanId)
+                .orElseThrow(() -> new IllegalArgumentException("Loan tidak ditemukan: " + loanId));
+        LoanAggregate aggregate = LoanAggregate.load(loan, null);
+        aggregate.expireFunding();
+        loanRepo.save(loan);
+    }
 
-                // Cancel 3x untuk mencapai batas
-                for (int i = 0; i < 3; i++) {
-                        LoanDTO l = applyLoanUseCase.execute(
-                                        new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                        approveLoanUseCase.execute(new ApproveLoanCommand(l.getId(), true));
-                        investLoanUseCase.execute(
-                                        new InvestCommand(budi.getId(), l.getId(), new BigDecimal("6000000")));
-                        cancelLoanUseCase.execute(
-                                        new CancelLoanCommand(iman.getId(), l.getId(),
-                                                        new Money(new BigDecimal("6000000"), "IDR")));
-                }
+    private LoanStatus getLoanStatus(String loanId) {
+        return loanRepo.findById(loanId)
+                .map(LoanApplication::getStatus)
+                .orElseThrow(() -> new IllegalArgumentException("Loan tidak ditemukan: " + loanId));
+    }
 
-                // Coba cancel ke-4 (cancellationCount = 3 → tidak boleh)
-                // Tapi karena borrower sudah diblokir, apply pun harusnya gagal
-                // Kita cek logika canCancelLoan langsung via service
-                Borrower blockedBorrower = borrowerRepo.findById(iman.getId()).get();
-                assertEquals(3, blockedBorrower.getCancellationCount());
-                assertNotNull(blockedBorrower.getLastBlockedDate(), "Borrower harus diblokir");
-        }
-
-        // ═════════════════════════════════════════════════════════════════
-        // SKENARIO 3 — EXPIRED FUNDING
-        // ═════════════════════════════════════════════════════════════════
-
-        @Test
-        @Order(7)
-        @DisplayName("Skenario 3: Loan tidak terfund → EXPIRED_FUNDING")
-        void scenario3_expiredFunding_statusSetCorrectly() {
-                // Register KEMAL (gaji 5jt → limit 15jt)
-                BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Kemal Peminjam", "085555555555", KTP_KEMAL,
-                                "Jl. Kuningan No. 7", 5_000_000L, 650));
-                assertNotNull(kemal.getId());
-
-                // KEMAL apply 15jt
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
-                assertEquals(15_000_000L, loan.getAmount());
-
-                // Admin approve → FUNDING
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-                assertEquals(LoanStatus.FUNDING, getLoanStatus(loan.getId()));
-
-                // Simulasi: 6 hari berlalu tanpa investor → EXPIRED_FUNDING
-                forceSetLoanStatus(loan.getId(), LoanStatus.EXPIRED_FUNDING);
-                assertEquals(LoanStatus.EXPIRED_FUNDING, getLoanStatus(loan.getId()),
-                                "Status harus EXPIRED_FUNDING setelah 5 hari tanpa funding");
-        }
-
-        @Test
-        @Order(8)
-        @DisplayName("Skenario 3b: Loan EXPIRED tidak bisa di-disburse")
-        void scenario3b_expiredLoan_cannotBesDisbursed() {
-                BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Kemal Peminjam", "085555555555", KTP_KEMAL,
-                                "Jl. Kuningan No. 7", 5_000_000L, 650));
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-
-                forceSetLoanStatus(loan.getId(), LoanStatus.EXPIRED_FUNDING);
-
-                // Disburse harus gagal
-                assertThrows(IllegalStateException.class,
-                                () -> disburseUseCase.execute(new DisburseLoanCommand(loan.getId())),
-                                "Loan expired tidak bisa di-disburse");
-        }
-
-        @Test
-        @Order(9)
-        @DisplayName("Skenario 3c: Loan EXPIRED tidak bisa di-approve ulang")
-        void scenario3c_expiredLoan_cannotBeReapproved() {
-                BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Kemal Peminjam", "085555555555", KTP_KEMAL,
-                                "Jl. Kuningan No. 7", 5_000_000L, 650));
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-
-                forceSetLoanStatus(loan.getId(), LoanStatus.EXPIRED_FUNDING);
-
-                // Approve ulang harus gagal
-                assertThrows(IllegalStateException.class,
-                                () -> approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true)),
-                                "Loan expired tidak bisa di-approve ulang");
-        }
-
-        // ═════════════════════════════════════════════════════════════════
-        // Edge Cases Tambahan
-        // ═════════════════════════════════════════════════════════════════
-
-        @Test
-        @Order(10)
-        @DisplayName("Edge case: Lender invest < 20% dari loan → ditolak")
-        void edgeCase_investLessThan20Percent_rejected() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 700));
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("20000000")));
-
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-
-                // Invest 5jt < 20% dari 30jt (threshold = 6jt)
-                assertThrows(IllegalArgumentException.class, () -> investLoanUseCase.execute(
-                                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("5000000"))),
-                                "Investasi di bawah 20% harus ditolak");
-        }
-
-        @Test
-        @Order(11)
-        @DisplayName("Edge case: Lender saldo tidak cukup → invest ditolak")
-        void edgeCase_insufficientSaldo_investRejected() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 700));
-                // BUDI hanya punya 5jt, padahal min invest 6jt (20% dari 30jt)
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("5000000")));
-
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-
-                assertThrows(IllegalArgumentException.class, () -> investLoanUseCase.execute(
-                                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000"))),
-                                "Invest harus ditolak jika saldo lender tidak cukup");
-        }
-
-        @Test
-        @Order(12)
-        @DisplayName("Edge case: Invest ke loan bukan status FUNDING → ditolak")
-        void edgeCase_investToNonFundingLoan_rejected() {
-                BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                                "Iman Santoso", "081111111111", KTP_IMAN,
-                                "Jl. Merdeka No. 1", 10_000_000L, 700));
-                LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                                "Budi Investor", "082222222222", KTP_BUDI,
-                                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
-
-                LoanDTO loan = applyLoanUseCase.execute(
-                                new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-                // Belum di-approve → masih PENDING
-
-                assertThrows(IllegalArgumentException.class, () -> investLoanUseCase.execute(
-                                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("10000000"))),
-                                "Tidak bisa invest ke loan yang belum FUNDING");
-        }
-
-        @Test
-        @Order(13)
-        @DisplayName("Edge case: Borrower tidak ditemukan saat apply → exception")
-        void edgeCase_borrowerNotFound_applyLoan() {
-                assertThrows(IllegalArgumentException.class, () -> applyLoanUseCase.execute(
-                                new ApplyLoanCommand("BORROWER-TIDAK-ADA", 10_000_000L, 6)),
-                                "Harus exception jika borrower tidak ditemukan");
-        }
-
-        // ═════════════════════════════════════════════════════════════════
-        // Helper Methods
-        // ═════════════════════════════════════════════════════════════════
-
-        /**
-         * Set loan status via reflection (sama pola dengan use case lain di codebase)
-         */
-        private void forceSetLoanStatus(String loanId, LoanStatus status) {
-                try {
-                        LoanApplication loan = loanRepo.findById(loanId)
-                                        .orElseThrow(() -> new IllegalArgumentException(
-                                                        "Loan tidak ditemukan: " + loanId));
-                        Field field = LoanApplication.class.getDeclaredField("status");
-                        field.setAccessible(true);
-                        field.set(loan, status);
-                        loanRepo.save(loan);
-                } catch (IllegalArgumentException e) {
-                        throw e;
-                } catch (Exception e) {
-                        throw new RuntimeException("Gagal set status loan via reflection", e);
-                }
-        }
-
-        private LoanStatus getLoanStatus(String loanId) {
-                return loanRepo.findById(loanId)
-                                .map(LoanApplication::getStatus)
-                                .orElseThrow(() -> new IllegalArgumentException("Loan tidak ditemukan: " + loanId));
-        }
-
-        private int getCancellationCount(String borrowerId) {
-                return borrowerRepo.findById(borrowerId)
-                                .map(Borrower::getCancellationCount)
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                                "Borrower tidak ditemukan: " + borrowerId));
-        }
+    private int getCancellationCount(String borrowerId) {
+        return borrowerRepo.findById(borrowerId)
+                .map(Borrower::getCancellationCount)
+                .orElseThrow(() -> new IllegalArgumentException("Borrower tidak ditemukan: " + borrowerId));
+    }
 }
