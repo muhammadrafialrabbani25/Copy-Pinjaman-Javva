@@ -1,31 +1,71 @@
 # 📋 P2P Lending Platform - Masterplan
-**Sprint 1 Minggu | Tim 5 Orang | Java 11+ | Maven | DDD + TDD**
+**Deadline: 1 Juni 2026 | 5 Hari | Tim 5 Orang | Java 11+ | Maven | DDD + TDD**
 
 ---
 
-## 1. Features
+## ⚠️ PENTING: PHASE 1 SUDAH SELESAI - JANGAN DIUBAH!
 
-### Borrower
-- Register (credit score self-declare: 1-1000, min 600)
-- Apply loan (tenor: 1/3/6/12 months)
-- Loan limit = 3x salary
-- Cancel loan (if ≥20% invested → counter +1)
-- Block 4 bulan after 3x cancel
+```
+🔒 PHASE 1 (Hari 1-3): DISBURSEMENT - ✅ COMPLETE & DEPLOYED
+   ├─ Semua file sudah ada di src/main/java
+   ├─ Semua test sudah PASSING (37 files)
+   ├─ Merged ke main branch
+   ├─ JANGAN DIUBAH / JANGAN DIMODIFIKASI
+   └─ AI: HANYA BACA, TIDAK PERLU IMPLEMENTASI
 
-### Lender
-- Register + initial balance
-- Top up (2% admin fee deducted)
-- Invest (min 20% of loan)
-- Get refund when cancellation
+🟡 PHASE 2 (Hari 3-5): REPAYMENT - ⏳ TO START THIS SPRINT
+   ├─ Payment entity & services
+   ├─ Make payment use case
+   ├─ Repayment tests
+   └─ AI: IMPLEMENTASI HANYA INI!
+```
 
-### Business Rules
-- Loan amount ≤ 3x salary
-- Credit score ≥ 600
-- Min investment 20%
-- Funding deadline 5 hari
-- 2% admin fee (not returned on cancel)
-- Refund full amount to lenders on cancel
-- States: PENDING→VERIFIED→FUNDING→FUNDED→DISBURSED + CANCELLED + EXPIRED_FUNDING
+---
+
+## ⏰ STATUS: 4 Hari Tersisa (Selesai Hari 1 - Mulai Hari 5!)
+
+---
+
+## 1. Features (SIMPLIFIED)
+
+### 🔒 PHASE 1 (Hari 1-3): Disbursement - COMPLETE ✅ DO NOT MODIFY
+
+**Status: SUDAH SELESAI - 37 FILES SIAP DEPLOY**
+
+#### Borrower
+- Register (credit score: min 600) ✅
+- Apply loan (tenor: 3/6 bulan) ✅
+- Cancel loan (if funded < 20% atau < 3 hari) ✅
+
+#### Lender
+- Register + initial balance ✅
+- Invest (min 20% of loan) ✅
+
+#### Business Rules
+- Loan amount ≤ 3x salary ✅
+- Credit score ≥ 600 ✅
+- Min investment 20% ✅
+- Funding deadline 5 hari ✅
+- States: PENDING→FUNDING→FUNDED→DISBURSED / CANCELLED / EXPIRED_FUNDING ✅
+
+**⚠️ PHASE 1 JANGAN DIRUBAH! Semua sudah tested & passed.**
+
+---
+
+### 🟡 PHASE 2 (Hari 3-5): Repayment - TO IMPLEMENT NOW
+#### Borrower
+- **Make monthly payment** (simple: pokok + bunga 3%)
+- **View payment status** (PENDING/PAID/OVERDUE)
+
+#### Lender
+- **View payment received** (dari cicilan borrower)
+
+#### Repayment Rules
+- Cicilan per bulan = Pokok + Bunga (3% × pokok)
+- Payment auto-generate saat DISBURSED
+- Status: PENDING → PAID (on time) / OVERDUE (telat)
+- Denda HANYA jika telat > 30 hari = pokok × 1%
+- Loan complete = semua payment PAID
 
 ---
 
@@ -42,314 +82,655 @@
 
 ---
 
-## 3. 5 GoF Patterns
+## 3. 5 GoF Patterns (SIMPLIFIED)
 
 | Pattern | File | Purpose |
 |---------|------|---------|
-| **State** | LoanStatus + LoanAggregate | Manage state transitions |
-| **Factory** | LoanAggregate.create() | Encapsulate creation + validation |
-| **Strategy** | PaymentScheduleService | Extensible interest calculation |
-| **Observer** | DomainEventPublisher + SimpleEventBus | Decouple events |
+| **State** | LoanStatus enum | Manage state transitions (PENDING→DISBURSED) |
+| **Factory** | LoanAggregate.create() | Create loan with validation |
+| **Strategy** | InterestCalculator (3% bunga) | Simple interest calc |
 | **Repository** | *Repository interfaces | Abstract data access |
+| **Aggregate** | LoanAggregate, RepaymentAggregate | DDD domain objects |
 
 ---
 
-## 4. DDD Structure
+## 4. DDD Structure (LEAN)
 
 ```
 src/main/java/com/p2plending/
 ├── domain/
-│   ├── borrower/ (entity, aggregate, service, repository interface)
-│   ├── lender/ (entity, aggregate, service, repository interface)
-│   └── shared/ (Money, LoanStatus, Tenor, DomainEventPublisher)
+│   ├── borrower/ (Borrower, LoanApplication, Payment)
+│   ├── lender/ (Lender, Investment)
+│   ├── aggregate/ (LoanAggregate, RepaymentAggregate)
+│   ├── service/ (LoanService, RepaymentService)
+│   └── shared/ (Money, LoanStatus, PaymentStatus)
 ├── application/
-│   ├── borrower/ (use cases, DTOs)
-│   ├── lender/ (use cases, DTOs)
-│   └── shared/
+│   ├── borrower/ (RegisterBorrowerUseCase, ApplyLoanUseCase, MakePaymentUseCase)
+│   ├── lender/ (RegisterLenderUseCase, InvestLoanUseCase)
+│   └── shared/ (ApproveLoanUseCase, DisburseUseCase)
 ├── infrastructure/
-│   ├── persistence/ (repositories implementation, SharedStorage)
-│   └── event/ (SimpleEventBus)
+│   └── persistence/ (repositories, SharedStorage)
 └── interfaces/
     └── cli/ (LendingApp.java)
-
-src/test/java/com/p2plending/
-├── domain/ (unit tests for entities, aggregates, services)
-└── application/ (unit tests for use cases with Mockito mocks)
 ```
 
 ---
 
-## 5. Team Tasks
+## 5. Team Tasks - PHASE 1 & 2
 
-| Person | Hari | Files | Layer | Depend |
-|--------|------|-------|-------|--------|
-| **IMAN** | 1-2 | 9 | Domain Entities | None |
-| **KEMAL** | 2-3 | 8 | Domain Services/Agg | ← Iman |
-| **DANANG** | 3-4 | 12 | Application | ← Kemal |
-| **JAYA** | 4-5 | 6 | Infrastructure | ← Danang |
-| **RAFI** | 5-7 | 2 | Interfaces + E2E | ← Jaya |
+**⚠️ PHASE 1 (Hari 1-3): SUDAH SELESAI - TIDAK PERLU IMPLEMENTASI**
 
-**Total: 37 Java files | Execution: Sequential pipeline**
+| Person | Days | PHASE 1 (COMPLETE ✅) |
+|--------|------|-------------|
+| **IMAN** | 1-2 | ✅ 5 Domain Entities (DONE) |
+| **KEMAL** | 2-3 | ✅ 4 Domain Services (DONE) |
+| **DANANG** | 2-4 | ✅ 3 Use Cases (DONE) |
+| **JAYA** | 3-4 | ✅ 3 Repositories (DONE) |
+| **RAFI** | 2-5 | ✅ 1 E2E Test Phase 1 (DONE) |
 
 ---
 
-## 6. IMAN: Domain Entities (Hari 1-2)
+**🟡 PHASE 2 (Hari 3-5): IMPLEMENTASI DIMULAI SEKARANG**
 
-**9 Files:**
+| Person | Days | PHASE 2 (TO DO) | Files |
+|--------|------|-------------|-------|
+| **IMAN** | 3-4 | Payment entities & enums | 2 files |
+| **KEMAL** | 3-4 | Repayment services | 2 files |
+| **DANANG** | 4-5 | Payment use cases | 2 files |
+| **JAYA** | 4-5 | Payment repository | 1 file |
+| **RAFI** | 4-5 | Repayment E2E test | 1 file |
 
-Borrower (4):
-- Borrower.java
-- LoanApplication.java
-- KTP.java (immutable, 16-digit format)
-- Payment.java
+**TOTAL PHASE 2: 8 files | TO IMPLEMENT NOW**
 
-Lender (2):
-- Lender.java
-- Investment.java
+---
 
-Shared (3):
-- Money.java (BigDecimal-based, immutable)
-- Tenor.java (enum: 1,3,6,12)
-- LoanStatus.java (enum: 7 states)
+## 6. IMAN: Domain Entities (Hari 1-2) - 5 FILES
 
-**Key Fields:**
-- Borrower: id, nama, noTelepon, alamat, ktp, gaji, pekerjaan, creditScore, cancellationCount, lastBlockedDate
-- LoanApplication: id, borrowerId, amount, tenor, status, createdDate, minInvestedPercentageReached, cancelledDate
-- Investment: id, lenderId, loanId, amount, status
+⚠️ **PHASE 1 - SUDAH SELESAI, JANGAN DIUBAH!**
+
+**PHASE 2 IMPLEMENTATION (Hari 3-4):**
+
+**Entities to ADD:**
+1. **Payment.java** - monthNumber, dueDate, amount, status, paidDate, denda
+2. **PaymentStatus.java** - enum: PENDING, PAID, OVERDUE
+
+**Key Requirements:**
+- dueDate = disbursedDate + (monthNumber × 30 days)
+- status default = PENDING
+- denda calculated automatically (1% × pokok jika >30 hari telat)
 
 **TDD Checklist:**
-- [ ] Start with KTP (immutable, format validation)
-- [ ] Money & Tenor (VO with equals/hashCode)
-- [ ] Borrower, Lender entities
-- [ ] LoanApplication, Investment, Payment
-- [ ] LoanStatus enum
-- [ ] Push: feature/domain-entities
+- [ ] Payment entity test
+- [ ] PaymentStatus enum test
+- [ ] dueDate calculation test
+- [ ] All tests GREEN
 
 ---
 
-## 7. KEMAL: Domain Services/Aggregates (Hari 2-3)
+## 7. KEMAL: Domain Services (Hari 2-3) - 7 FILES
 
-**8 Files:**
+⚠️ **PHASE 1 (4 files) - SUDAH SELESAI, JANGAN DIUBAH!**
+   - LoanService.java ✅
+   - InvestmentService.java ✅
+   - LoanAggregate.java ✅
+   - LoanStatusEnum ✅
 
-Borrower (4):
-- LoanAggregate.java (ROOT - STATE + FACTORY)
-- LoanApprovalService.java (verify score, calc limit)
-- PaymentScheduleService.java (STRATEGY)
-- LoanCancellationService.java (cancel, refund, counter, block)
+**PHASE 2 IMPLEMENTATION (Hari 3-4) - 2 FILES BARU:**
 
-Lender (2):
-- LenderAggregate.java (ROOT)
-- InvestmentService.java (validate min 20%)
+1. **RepaymentService.java**
+   - makePayment(loanId, paymentAmount): process & update status
+   - checkAndUpdateStatus(): PENDING → PAID or OVERDUE (jika telat > 30 hari)
+   - calculateDenda(totalDebt, daysLate): 1% × pokok
 
-Shared (2):
-- DomainEventPublisher.java (OBSERVER interface)
-- LoanStatus.java (canTransitionTo validation)
-
-**Key Methods:**
-- LoanAggregate.create(): Validate & init loan
-- LoanApprovalService: verifyCreditScore, calculateLoanLimit, verifyKTP
-- LoanCancellationService: cancelLoan, isBlockedFromApplying, refundInvestment
-- InvestmentService: validateMinimumInvestment
-
-**Understand:**
-- **Aggregate Root:** LoanAggregate manages internal entities (Investment, Payment)
-- **Service:** Stateless operations across aggregates
-- **State Pattern:** LoanStatus enum with valid transitions
+2. **InterestCalculator.java** - STRATEGY pattern
+   - calculate(principalAmount): return pokok × 3%
 
 **TDD Checklist:**
-- [ ] LoanStatus transitions validation
-- [ ] LoanApprovalService (score ≥600, limit calc)
-- [ ] PaymentScheduleService (interest calc)
-- [ ] LoanCancellationService (refund logic)
-- [ ] LoanAggregate & LenderAggregate
-- [ ] DomainEventPublisher interface
-- [ ] Push: feature/domain-aggregates-services
+- [ ] RepaymentService (payment processing)
+- [ ] Denda calculator (0% untuk ≤30 hari, 1% untuk >30)
+- [ ] Status updates (automatic, not manual)
+- [ ] All tests GREEN
 
 ---
 
-## 8. DANANG: Application Layer (Hari 3-4)
+## 8. DANANG: Application Layer (Hari 2-4) - 5 FILES
 
-**12 Files + Mockito:**
+⚠️ **PHASE 1 (3 files) - SUDAH SELESAI, JANGAN DIUBAH!**
+   - RegisterBorrowerUseCase + DTO ✅
+   - ApplyLoanUseCase + DTO ✅
+   - InvestLoanUseCase + DTO ✅
 
-Borrower (5 use cases + 6 DTOs):
-- RegisterBorrowerUseCase + Command/DTO
-- ApplyLoanUseCase + Command/DTO (check block period)
-- CancelLoanUseCase + Command (NEW)
-- GetLoanDetailsUseCase
-- GetLoanListUseCase (display cancellationCount)
+**PHASE 2 IMPLEMENTATION (Hari 4-5) - 2 FILES BARU:**
 
-Lender (4 use cases + DTOs):
-- RegisterLenderUseCase + Command/DTO
-- TopUpSaldoUseCase (calc 2% fee)
-- InvestLoanUseCase (complex: state + event)
-- GetAvailableLoansUseCase
+1. **MakePaymentUseCase + DTO**
+   - Input: borrowerId, loanId, paymentAmount, paymentDate
+   - Output: PaymentDTO (status, denda jika ada)
+   - Update payment status & repayment status
 
-Shared:
-- ApproveLoanUseCase
+2. **GetPaymentScheduleUseCase + DTO**
+   - Input: loanId
+   - Output: List<PaymentDTO> dengan due date, amount, status
 
-**Mockito Pattern:**
-- @Mock BorrowerRepository
-- @Mock LoanRepository
-- @InjectMocks ApplyLoanUseCase
-- when(repo.findById(...)).thenReturn(...)
-- verify(repo).save(any(...))
+**TDD with Mockito:**
+- @Mock repositories
+- @InjectMocks use cases
+- Simple test: input → process → verify output
 
 **TDD Checklist:**
-- [ ] RegisterBorrowerUseCase (test + mock repo)
-- [ ] ApplyLoanUseCase (check block, mock repos)
-- [ ] CancelLoanUseCase (verify refund logic)
-- [ ] Lender use cases (TopUp, Invest)
-- [ ] Push: feature/application-layer
+- [ ] MakePaymentUseCase (process payment, update status)
+- [ ] GetPaymentScheduleUseCase (return list)
+- [ ] All tests GREEN
 
 ---
 
-## 9. JAYA: Infrastructure (Hari 4-5)
+## 9. JAYA: Infrastructure (Hari 3-4) - 4 FILES
 
-**6 Files:**
+⚠️ **PHASE 1 (3 files) - SUDAH SELESAI, JANGAN DIUBAH!**
+   - SharedStorage.java ✅
+   - InMemoryBorrowerRepository.java ✅
+   - InMemoryLoanRepository.java ✅
 
-Repositories (5):
-- SharedStorage.java (Singleton HashMap)
-- InMemoryBorrowerRepository.java
-- InMemoryLoanRepository.java
-- InMemoryLenderRepository.java
-- InMemoryInvestmentRepository.java
+**PHASE 2 IMPLEMENTATION (Hari 4-5) - 1 FILE BARU:**
 
-Event:
-- SimpleEventBus.java (implements DomainEventPublisher)
+1. **InMemoryPaymentRepository.java**
+   - save(payment): add to HashMap
+   - findById(id): return from HashMap
+   - findByLoanId(loanId): filter List<Payment>
+   - updateStatus(paymentId, status): find & update
 
 **TDD Checklist:**
-- [ ] Repositories (CRUD operations, find by ID)
-- [ ] SimpleEventBus (subscribe, publish)
-- [ ] Integration test (complete flow)
-- [ ] Push: feature/infrastructure-layer
+- [ ] PaymentRepository (CRUD basic)
+- [ ] findByLoanId, updateStatus
+- [ ] Integration test (save & retrieve)
+- [ ] All tests GREEN
 
 ---
 
-## 10. RAFI: Interfaces + E2E (Hari 5-7)
+## 10. RAFI: E2E Tests (Hari 2-5) - 2 FILES
 
-**2 Files - Hardcoded Demo:**
+⚠️ **PHASE 1 - SUDAH SELESAI, JANGAN DIUBAH!**
+   - EndToEndFlowTest.java (Phase 1 scenarios) ✅
+   - LendingApp.java (Phase 1 demo) ✅
 
-**LendingApp.java:**
-- Manual DI (no Spring)
-- 3 scenarios hardcoded:
-  1. Happy path: IMAN apply 30M → BUDI invest 6M
-  2. Cancellation: IMAN cancel → BUDI refund → counter = 1
-  3. Expired: KEMAL apply 15M → 6 days → EXPIRED_FUNDING
-- Console output with emoji + details
+**PHASE 2 IMPLEMENTATION (Hari 4-5) - ADD TO EXISTING TESTS:**
 
-**EndToEndFlowTest.java:**
-- Test all 3 scenarios
-- No mocks (real repositories)
-- Verify: refund amount, counter increment, status transitions
+**Add 3 Scenarios ke EndToEndFlowTest.java:**
+- Scenario 1: Borrower register → apply loan → approve → lender invest → FUNDED → disburse → DISBURSED ✅ (already tested)
+- Scenario 2 (NEW): Payment on time → status PAID → next payment
+- Scenario 3 (NEW): Payment telat 40 hari → status OVERDUE → denda 1% × pokok
+
+**Update LendingApp.java:**
+- Keep Phase 1 hardcoded demo
+- Add Phase 2 scenarios (payment flow)
+- Console output dengan timeline jelas
 
 **TDD Checklist:**
-- [ ] Write test cases (RED)
-- [ ] Hardcoded scenarios (GREEN)
-- [ ] Verify output format
-- [ ] All edge cases covered
-- [ ] Push: feature/presentation-integration
+- [ ] Add Phase 2 scenarios to E2E test
+- [ ] Verify payment processing
+- [ ] Verify denda calculation
+- [ ] All tests GREEN (both phases)
 
 ---
 
-## 11. Git Strategy
+## 11. Git Strategy (SIMPLE)
 
 ```
 main (production)
-  ↑ merge Day 7
 develop (integration)
-  ↑ PR Day 5
-feature/domain-entities (Iman)
-feature/domain-aggregates-services (Kemal)
-feature/application-layer (Danang)
-feature/infrastructure-layer (Jaya)
-feature/presentation-integration (Rafi)
+├── feature/phase1-disbursement (Hari 1-3)
+└── feature/phase2-repayment (Hari 3-5)
 ```
 
----
-
-## 12. TDD Workflow (Every File)
-
-1. Write test (RED)
-2. Verify test fails
-3. Write code (GREEN)
-4. Test passes
-5. Refactor
-6. Commit: `feat(layer): desc - test + impl`
+Merge to develop Hari 3, then main Hari 5.
 
 ---
 
-## 13. Definition of Done
+## 12. TDD Workflow
+
+```
+RED (test fail) → GREEN (test pass) → REFACTOR → COMMIT
+```
+**Every file, every time. No exceptions.**
+
+---
+
+## 13. Definition of Done (QUICK VERSION)
 
 **Daily:**
 - [ ] Code written + tested
-- [ ] Coverage >80%
-- [ ] Self-reviewed
-- [ ] Committed
+- [ ] All tests GREEN
+- [ ] No compile errors
 
-**Per Module:**
-- [ ] All tests PASS
-- [ ] No compilation errors
-- [ ] Merged to develop
-
-**Final (Day 7):**
-- [ ] All tests PASS (>85% coverage)
-- [ ] CLI runnable
+**Phase 1 (Hari 3):**
+- [ ] Disbursement flow working
 - [ ] E2E test success
-- [ ] Git history clean
+
+**Phase 2 (Hari 5):**
+- [ ] Repayment flow working
+- [ ] Full E2E test success
 - [ ] Final merge to main
 
 ---
 
 ## 14. Critical Rules ⚠️
 
-1. **RED→GREEN→REFACTOR every time** (mandatory)
-2. **Repository INTERFACE in domain, IMPL in infrastructure** (not reversed!)
-3. **Domain NEVER imports application/infrastructure** (dependency down only)
-4. **Mockito ONLY in application layer** (not in domain)
-5. **HashMap is FINAL** (no DB migration)
-6. **5 GoF patterns MUST exist** (natural placement)
-7. **Test DAILY** (don't batch at end)
-8. **Commit FREQUENT** (min 1x per file)
-9. **Aggregate = object with state** (ROOT manages internals)
-10. **Service = stateless operations** (functions across aggregates)
+1. **🔒 DO NOT MODIFY PHASE 1** - Disbursement is COMPLETE & tested
+   - Do NOT touch: Borrower, LoanApplication, LoanAggregate, LoanService, etc.
+   - Do NOT modify existing tests or code
+   - ONLY add new PHASE 2 features
+   
+2. **RED→GREEN→REFACTOR (mandatory)**
+
+3. **Repository INTERFACE in domain, IMPL in infrastructure**
+
+4. **Domain never imports application/infrastructure**
+
+5. **Mockito only in application tests**
+
+6. **Payment status AUTOMATIC (calculated, not manual)**
+
+7. **Denda = 1% × pokok, only if >30 hari telat**
+
+8. **No complex logic - keep it simple!**
+
+9. **Commit every file after test passes**
+
+10. **PHASE 2 ONLY: Payment entity, RepaymentService, MakePaymentUseCase, PaymentRepository, E2E scenarios**
 
 ---
 
-## 15. Timeline
+## 15. Timeline Summary
 
-| Hari | Iman | Kemal | Danang | Jaya | Rafi |
-|------|------|-------|--------|------|------|
-| 1-2 | Entities | - | - | - | Setup |
-| 2-3 | Push | Services | - | - | Review |
-| 3-4 | Review | Push | Use Cases | - | Prepare |
-| 4-5 | Assist | Assist | Push | Infrastructure | Review |
-| 5-6 | Test | Test | Test | Push | E2E+CLI |
-| 7 | Merge | Merge | Merge | Merge | Final |
+| Phase | Status | Days | IMAN | KEMAL | DANANG | JAYA | RAFI |
+|-------|--------|------|------|-------|--------|------|------|
+| **PHASE 1** | ✅ DONE | Hari 1-3 | ✅ 5 files | ✅ 4 services | ✅ 3 use cases | ✅ 3 repos | ✅ 1 E2E |
+| **PHASE 2** | 🟡 TODO | Hari 3-5 | 2 Payment files | 2 Repayment svc | 2 Payment use cases | 1 Payment repo | Add E2E scenarios |
 
-**Dependency: IMAN→KEMAL→DANANG→JAYA→RAFI (sequential)**
+**Total PHASE 2: Only 8 files to implement**
 
 ---
 
-## 16. Execution Checklist
+## 16. Clean Code Guidelines (MANDATORY)
 
-**Pre-Sprint:**
-- [ ] Maven pom.xml setup (JUnit 5, Mockito)
-- [ ] Git initialized (main, develop branches)
-- [ ] Feature branches created (per person)
+Semua kode PHASE 2 HARUS mengikuti Clean Code principles dari Uncle Bob:
 
-**During Sprint:**
-- [ ] Daily standup (09:00, 15 min)
-- [ ] Code review (daily)
-- [ ] Tests GREEN (daily)
-- [ ] Commits meaningful
+### 1. MEANINGFUL NAMES
+✅ **GOOD**
+```java
+double monthlyPayment = principal / tenor + (principal * INTEREST_RATE);
+boolean isPaymentOverdue = paymentDate.isAfter(dueDate);
+```
 
-**Post-Sprint:**
-- [ ] All PRs merged
-- [ ] E2E test success
-- [ ] Coverage report >85%
-- [ ] Documentation complete
-- [ ] Final demo ready
+❌ **BAD**
+```java
+double mp = p / t + (p * 0.03);
+boolean pd = pd > dd;  // ambiguous variable names
+```
+
+**Aturan:**
+- Gunakan nama yang menjelaskan tujuan (intent)
+- Hindari nama singkat atau ambigu (d, t, x)
+- Satu kata untuk satu konsep
+- Gunakan pronounceable names
+
+### 2. FUNCTIONS (SMALL & FOCUSED)
+✅ **GOOD**
+```java
+public void makePayment(String loanId, BigDecimal amount) {
+    validatePaymentAmount(amount);
+    updatePaymentStatus(loanId, amount);
+    notifyLender(loanId);
+}
+
+private void validatePaymentAmount(BigDecimal amount) {
+    if (amount.compareTo(ZERO) <= 0) {
+        throw new IllegalArgumentException("Payment amount must be positive");
+    }
+}
+```
+
+❌ **BAD**
+```java
+// Function terlalu panjang dan melakukan banyak hal
+public void makePayment(String loanId, BigDecimal amount) {
+    if (amount <= 0) throw new Exception("Invalid");
+    // validasi
+    // update status
+    // notify
+    // distribute
+    // log
+    // ... 100+ lines
+}
+```
+
+**Aturan:**
+- Fungsi harus kecil (5-10 baris ideal)
+- Satu fungsi = satu tanggung jawab (Single Responsibility)
+- Nama fungsi harus deskriptif
+- Parameter minimal (max 3)
+
+### 3. COMMENTS (MINIMAL)
+✅ **GOOD**
+```java
+// Kode yang self-documenting, minimal comments
+public BigDecimal calculateDenda(BigDecimal principal, int daysLate) {
+    if (daysLate <= 30) return ZERO;
+    return principal.multiply(DENDA_RATE);  // 1% of principal
+}
+```
+
+❌ **BAD**
+```java
+// Calculate denda
+// Input: p = principal, d = days late
+// Output: denda amount
+public BigDecimal calc(BigDecimal p, int d) {  // Wrong name!
+    // if days > 30
+    if (d > 30) {
+        // multiply by 1%
+        return p.multiply(new BigDecimal("0.01"));
+    }
+    return new BigDecimal("0");
+}
+```
+
+**Aturan:**
+- Kode harus self-documenting (nama jelas = comment minimal)
+- Hanya gunakan comment untuk:
+  - Legal (copyright)
+  - Warning (beware of this!)
+  - Explanation of intent (WHY, bukan WHAT)
+  - TODO comments untuk pekerjaan belum selesai
+
+### 4. FORMATTING & STRUCTURE
+✅ **GOOD**
+```java
+public class PaymentService {
+    private static final BigDecimal DENDA_RATE = new BigDecimal("0.01");
+    private static final int DENDA_THRESHOLD_DAYS = 30;
+    
+    private PaymentRepository paymentRepository;
+    
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
+    }
+    
+    public void processPayment(String loanId, BigDecimal amount) {
+        validatePaymentAmount(amount);
+        updatePaymentStatus(loanId, amount);
+    }
+    
+    private void validatePaymentAmount(BigDecimal amount) {
+        // ...
+    }
+}
+```
+
+❌ **BAD**
+```java
+// Class tidak terorganisir, indentasi inconsistent
+public class PaymentService{
+private PaymentRepository r;
+public PaymentService(PaymentRepository repo){this.r=repo;}
+public void p(String id,BigDecimal a){if(a>0){r.save(id,a);}}
+}  // Sangat sulit dibaca!
+```
+
+**Aturan:**
+- Gunakan indentasi konsisten (4 spaces)
+- File tidak lebih dari 500 baris
+- Related methods harus berdekatan
+- Deklarasi constants di atas
+- Gunakan line length max 120 karakter
+
+### 5. ERROR HANDLING
+✅ **GOOD**
+```java
+try {
+    FileReader reader = new FileReader(filePath);
+    return gson.fromJson(reader, Config.class);
+} catch (FileNotFoundException e) {
+    logger.error("Config file not found: " + filePath, e);
+    throw new ConfigurationException("Failed to load config: " + filePath, e);
+} catch (JsonSyntaxException e) {
+    logger.error("Invalid JSON in config file: " + filePath, e);
+    throw new ConfigurationException("Invalid config format", e);
+}
+```
+
+❌ **BAD**
+```java
+try {
+    // ... code
+} catch (Exception e) {  // Terlalu generic!
+    e.printStackTrace();  // Don't do this!
+    return null;  // Returning null is bad
+}
+```
+
+**Aturan:**
+- Tangani exception spesifik, bukan generic Exception
+- Berikan konteks yang cukup di pesan error
+- Jangan return null (throw exception instead)
+- Use try-with-resources untuk auto-close
+
+### 6. OBJECTS & DATA STRUCTURES
+✅ **GOOD**
+```java
+// Object dengan behavior
+public class Payment {
+    private BigDecimal amount;
+    private LocalDateTime dueDate;
+    private PaymentStatus status;
+    
+    public boolean isOverdue() {
+        return LocalDateTime.now().isAfter(dueDate) && status == PaymentStatus.PENDING;
+    }
+    
+    public BigDecimal calculateDenda() {
+        if (!isOverdue()) return ZERO;
+        int daysLate = calculateDaysLate();
+        if (daysLate <= 30) return ZERO;
+        return amount.multiply(DENDA_RATE);
+    }
+}
+```
+
+❌ **BAD**
+```java
+// Data structure tanpa behavior (anemic object)
+public class Payment {
+    public BigDecimal amount;
+    public LocalDateTime dueDate;
+    public String status;
+    // No methods! Just getters/setters
+}
+
+// Then scattered logic everywhere
+if (payment.dueDate.isBefore(now) && payment.status.equals("PENDING")) {
+    // calculate denda...
+}
+```
+
+**Aturan:**
+- Object harus punya behavior (methods)
+- Encapsulation: private fields + public methods
+- Jangan expose internal structure
+- Data structure: simple data containers only
+
+### 7. TESTING (UNIT TESTS)
+✅ **GOOD**
+```java
+@Test
+public void makePayment_OnTimePayment_StatusShouldBePaid() {
+    // Arrange
+    Payment payment = new Payment(amount, dueDate);
+    
+    // Act
+    paymentService.processPayment(payment);
+    
+    // Assert
+    assertEquals(PaymentStatus.PAID, payment.getStatus());
+}
+
+@Test
+public void calculateDenda_LatePayment40Days_ShouldReturnDenda() {
+    // Arrange
+    Payment payment = new Payment(principal, dueDate.minusDays(40));
+    
+    // Act
+    BigDecimal denda = payment.calculateDenda();
+    
+    // Assert
+    assertEquals(principal.multiply(DENDA_RATE), denda);
+}
+```
+
+❌ **BAD**
+```java
+@Test
+public void test1() {
+    // Unclear test name
+    Payment p = new Payment(1000, LocalDateTime.now().minusDays(50));
+    BigDecimal d = p.getDenda();
+    assertTrue(d > 0);  // Weak assertion
+}
+```
+
+**Aturan:**
+- Test name = describe what is being tested
+- Format: `methodName_Condition_ExpectedResult`
+- AAA pattern: Arrange, Act, Assert
+- One assertion per test (atau related assertions)
+- 100% coverage untuk critical path
+
+### 8. DEPENDENCY INJECTION (Constructor Injection)
+✅ **GOOD**
+```java
+public class MakePaymentUseCase {
+    private final PaymentRepository paymentRepository;
+    private final RepaymentService repaymentService;
+    
+    public MakePaymentUseCase(PaymentRepository repo, RepaymentService service) {
+        this.paymentRepository = repo;
+        this.repaymentService = service;
+    }
+    
+    public void execute(String loanId, BigDecimal amount) {
+        // Use dependencies
+    }
+}
+```
+
+❌ **BAD**
+```java
+public class MakePaymentUseCase {
+    private PaymentRepository paymentRepository = new InMemoryPaymentRepository();  // Tightly coupled!
+    
+    public void execute(String loanId, BigDecimal amount) {
+        // Hard to test
+    }
+}
+```
+
+**Aturan:**
+- Gunakan constructor injection
+- Dependencies dalam constructor parameter
+- Jangan create instances dalam class (tightly coupled)
+- Memudahkan testing dengan mock
+
+### 9. NAMING CONVENTIONS FOR JAVA
+```java
+// Classes: PascalCase
+public class PaymentService { }
+public class RepaymentAggregate { }
+
+// Methods & Variables: camelCase
+public void calculateDenda() { }
+BigDecimal monthlyPayment = ...;
+
+// Constants: UPPER_SNAKE_CASE
+private static final BigDecimal DENDA_RATE = new BigDecimal("0.01");
+private static final int DENDA_THRESHOLD_DAYS = 30;
+
+// Booleans: is/has prefix
+boolean isOverdue = false;
+boolean isActive = true;
+boolean hasError = false;
+```
+
+### 10. DESIGN PATTERNS (Use Naturally, Don't Over-Engineer)
+```java
+// STRATEGY: Interest calculation
+public interface InterestCalculator {
+    BigDecimal calculate(BigDecimal principal);
+}
+
+public class SimpleInterestCalculator implements InterestCalculator {
+    public BigDecimal calculate(BigDecimal principal) {
+        return principal.multiply(RATE);
+    }
+}
+
+// AGGREGATE: Loan management
+public class LoanAggregate {
+    private Loan loan;
+    private List<Payment> payments;
+    
+    public void makePayment(BigDecimal amount) { }
+    public boolean isComplete() { }
+}
+
+// REPOSITORY: Data access
+public interface PaymentRepository {
+    void save(Payment payment);
+    Payment findById(String id);
+    List<Payment> findByLoanId(String loanId);
+}
+```
 
 ---
 
-**Good luck! 🚀**
+### CHECKLIST SEBELUM COMMIT
+
+Sebelum push code ke git, pastikan:
+
+- [ ] Semua method names deskriptif (bukan p(), f(), x())
+- [ ] Semua class names meaningful (bukan Util, Helper)
+- [ ] Semua functions kecil (< 20 baris)
+- [ ] Tidak ada nested if/loop lebih dari 2 level
+- [ ] Tidak ada magic numbers (gunakan constants)
+- [ ] Comments hanya untuk "WHY", bukan "WHAT"
+- [ ] Proper exception handling (specific exceptions)
+- [ ] Consistent indentation & formatting
+- [ ] Unit tests ada & passing (>80% coverage)
+- [ ] No commented-out code (delete, gunakan git history)
+- [ ] No println/System.out (use logger)
+- [ ] No global variables (tightly coupled)
+- [ ] Dependency injection digunakan
+- [ ] No null returns (throw exception)
+- [ ] Code reviewed oleh team member
+
+---
+
+**INGAT:** "Code is read much more often than it is written." — Uncle Bob
+
+Tulis kode untuk manusia, bukan komputer! 🎯
+
+---
+
+## 🎯 KEY SIMPLIFICATIONS
+
+1. **23 files instead of 61** - lean scope
+2. **3+2 use cases** - focus on core flow
+3. **5 GoF patterns** - essential only
+4. **No Observer/Event bus** - overhead removed
+5. **Denda logic simple** - 1% only if >30 hari
+6. **Payment auto-generated** - no manual entry
+7. **Two phases only** - Disbursement + Repayment
+8. **Hardcoded demo** - no CLI complexity
+
+---
+
+**STATUS: 4 HARI TERSISA → SPRINT MULAI SEKARANG! 🚀**
+**JANGAN KOMPLEKS, FOKUS PADA CORE FLOW SAJA!**
