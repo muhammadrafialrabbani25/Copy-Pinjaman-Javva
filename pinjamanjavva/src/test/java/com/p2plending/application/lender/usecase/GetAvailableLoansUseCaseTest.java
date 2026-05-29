@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.lang.reflect.Field;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,8 +40,8 @@ public class GetAvailableLoansUseCaseTest {
         LoanApplication pendingLoan = new LoanApplication(
             "LN002", "BR002", new Money(BigDecimal.valueOf(5000000), "IDR"), Tenor.SIX_MONTHS, 700
         );
-        setLoanStatus(fundingLoan, LoanStatus.FUNDING);
-        setLoanStatus(pendingLoan, LoanStatus.PENDING);
+        fundingLoan.updateStatus(LoanStatus.FUNDING);
+        pendingLoan.updateStatus(LoanStatus.PENDING);
 
         when(loanRepository.findAll()).thenReturn(Arrays.asList(fundingLoan, pendingLoan));
 
@@ -64,13 +64,5 @@ public class GetAvailableLoansUseCaseTest {
         verify(loanRepository).findAll();
     }
 
-    private void setLoanStatus(LoanApplication loan, LoanStatus status) {
-        try {
-            Field field = LoanApplication.class.getDeclaredField("status");
-            field.setAccessible(true);
-            field.set(loan, status);
-        } catch (Exception e) {
-            throw new RuntimeException("Gagal set status", e);
-        }
-    }
+
 }

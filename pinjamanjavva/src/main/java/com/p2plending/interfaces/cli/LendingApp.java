@@ -18,6 +18,7 @@ import com.p2plending.application.shared.ApproveLoanCommand;
 import com.p2plending.application.shared.ApproveLoanUseCaseImpl;
 import com.p2plending.application.shared.DisburseLoanCommand;
 import com.p2plending.application.shared.DisburseUseCaseImpl;
+import com.p2plending.domain.borrower.aggregate.LoanAggregate;
 import com.p2plending.domain.borrower.entity.Borrower;
 import com.p2plending.domain.borrower.entity.LoanApplication;
 import com.p2plending.domain.borrower.service.LoanApprovalService;
@@ -31,7 +32,6 @@ import com.p2plending.infrastructure.persistence.InMemoryInvestmentRepository;
 import com.p2plending.infrastructure.persistence.InMemoryLenderRepository;
 import com.p2plending.infrastructure.persistence.InMemoryLoanRepository;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 public class LendingApp {
@@ -52,7 +52,7 @@ public class LendingApp {
     private static final ApplyLoanUseCaseImpl      applyLoanUseCase        = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
     private static final ApproveLoanUseCaseImpl    approveLoanUseCase      = new ApproveLoanUseCaseImpl(loanRepo);
     private static final DisburseUseCaseImpl       disburseUseCase         = new DisburseUseCaseImpl(loanRepo);
-    private static final CancelLoanUseCaseImpl     cancelLoanUseCase       = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService);
+    private static final CancelLoanUseCaseImpl     cancelLoanUseCase       = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
     private static final RegisterLenderUseCaseImpl registerLenderUseCase   = new RegisterLenderUseCaseImpl(lenderRepo);
     private static final TopUpSaldoUseCaseImpl     topUpSaldoUseCase       = new TopUpSaldoUseCaseImpl(lenderRepo);
     private static final InvestLoanUseCaseImpl     investLoanUseCase       = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);
@@ -71,7 +71,7 @@ public class LendingApp {
     }
 
     // =============================================================
-    // SKENARIO 1 - Happy Path: IMAN apply 30jt, BUDI invest full -> DISBURSED
+    // SKENARIO 1 - Happy Path: IMAN apply 30jt → BUDI invest full -> DISBURSED
     // =============================================================
     private static void scenario1HappyPath() {
         System.out.println("[SKENARIO 1] HAPPY PATH - Loan berhasil dicairkan");
@@ -90,7 +90,7 @@ public class LendingApp {
         System.out.printf("[Loan]      Loan diajukan      : %s | Rp 30.000.000 | 6 bulan%n", loan.getId());
         printLoanStatus(loan.getId(), "PENDING");
 
-        // 3. Admin setujui loan
+        // 3. Admin setujui loan → PENDING → VERIFIED → FUNDING (via State Pattern)
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
         printLoanStatus(loan.getId(), "FUNDING");
 
@@ -101,7 +101,8 @@ public class LendingApp {
         ));
         System.out.printf("[Lender]    Lender terdaftar   : %s  (saldo: Rp 50.000.000)%n", budi.getNama());
 
-        // 5. BUDI invest 30jt (100% -> fully funded)
+        // 5. BUDI invest 30jt (100%)
+        //    → State Pattern otomatis transisi ke FUNDED via FundingState.checkFundingComplete()
         investLoanUseCase.execute(
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("30000000")));
         System.out.println("[Invest]    BUDI invest        : Rp 30.000.000 (100% dari loan amount)");
@@ -109,11 +110,10 @@ public class LendingApp {
         BigDecimal sisaSaldoBudi = getSaldo(budi.getId());
         System.out.printf("            Saldo BUDI sisa    : Rp %,.0f%n", sisaSaldoBudi);
 
-        // 6. Sistem mendeteksi fully funded -> set FUNDED
-        forceSetLoanStatus(loan.getId(), LoanStatus.FUNDED);
+        // 6. Status sudah FUNDED otomatis via State Pattern (tidak perlu force set)
         printLoanStatus(loan.getId(), "FUNDED");
 
-        // 7. Admin disburse
+        // 7. Admin disburse → FUNDED → DISBURSED (via State Pattern)
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
         printLoanStatus(loan.getId(), "DISBURSED");
 
@@ -141,7 +141,7 @@ public class LendingApp {
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 3));
         System.out.printf("[Loan]      Loan diajukan      : %s | Rp 30.000.000 | 3 bulan%n", loan.getId());
 
-        // 3. Admin approve
+        // 3. Admin approve → FUNDING (via State Pattern)
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
         printLoanStatus(loan.getId(), "FUNDING");
 
@@ -152,7 +152,7 @@ public class LendingApp {
         ));
         System.out.printf("[Lender]    Lender terdaftar   : %s  (saldo: Rp 20.000.000)%n", budi.getNama());
 
-        // 5. BUDI invest 6jt (tepat 20% dari 30jt -> memenuhi syarat cancel)
+        // 5. BUDI invest 6jt (tepat 20% dari 30jt -> memenuhi syarat cancel dengan penalty)
         investLoanUseCase.execute(
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
         System.out.println("[Invest]    BUDI invest        : Rp 6.000.000 (= 20% dari 30jt)");
@@ -164,14 +164,12 @@ public class LendingApp {
         int countSebelum = getCancellationCount(iman.getId());
         System.out.printf("[Warning]   Cancellation count sebelum : %d%n", countSebelum);
 
-        // 7. IMAN cancel loan
+        // 7. IMAN cancel loan → CANCELLED (via LoanCancellationService + State Pattern)
         Money fundedAmount = new Money(new BigDecimal("6000000"), "IDR");
         cancelLoanUseCase.execute(new CancelLoanCommand(iman.getId(), loan.getId(), fundedAmount));
         printLoanStatus(loan.getId(), "CANCELLED");
 
         // 8. Simulasi refund ke BUDI (business rule: refund penuh)
-        //    Di sistem nyata ini ditangani oleh event/refund service
-        //    Untuk demo kita tampilkan nilai refund yang seharusnya diterima
         System.out.println("[Refund]    Refund ke BUDI     : Rp 6.000.000 (full refund sesuai business rule)");
 
         // 9. Cancellation count sesudah
@@ -210,16 +208,17 @@ public class LendingApp {
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
         System.out.printf("[Loan]      Loan diajukan      : %s | Rp 15.000.000 | 12 bulan%n", loan.getId());
 
-        // 3. Admin approve
+        // 3. Admin approve → FUNDING (via State Pattern)
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
         printLoanStatus(loan.getId(), "FUNDING");
 
         // 4. Simulasi: 6 hari berlalu tanpa investor yang cukup
+        //    → Gunakan State Pattern: FUNDING → EXPIRED_FUNDING via expireFunding()
         System.out.println("[Wait]      Simulasi: 6 hari berlalu tanpa investor...");
-        forceSetLoanStatus(loan.getId(), LoanStatus.EXPIRED_FUNDING);
+        expireLoanFunding(loan.getId());
         printLoanStatus(loan.getId(), "EXPIRED_FUNDING");
 
-        // 5. Coba disburse -> harus gagal
+        // 5. Coba disburse -> harus gagal (EXPIRED_FUNDING tidak bisa disburse)
         System.out.println("[Test]      Mencoba disburse loan expired...");
         try {
             disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
@@ -238,18 +237,17 @@ public class LendingApp {
     // Helpers
     // =============================================================
 
-    /** Set status loan via reflection (sama pola dengan use case lain di codebase) */
-    private static void forceSetLoanStatus(String loanId, LoanStatus status) {
-        try {
-            LoanApplication loan = loanRepo.findById(loanId)
-                    .orElseThrow(() -> new IllegalArgumentException("Loan tidak ditemukan: " + loanId));
-            Field field = LoanApplication.class.getDeclaredField("status");
-            field.setAccessible(true);
-            field.set(loan, status);
-            loanRepo.save(loan);
-        } catch (Exception e) {
-            throw new RuntimeException("Gagal set status loan", e);
-        }
+    /**
+     * Trigger expireFunding via State Pattern (FUNDING → EXPIRED_FUNDING).
+     * Menggantikan reflection hack — sekarang lewat LoanAggregate.expireFunding()
+     * yang memanggil FundingState → transitionToState(new ExpiredFundingState()).
+     */
+    private static void expireLoanFunding(String loanId) {
+        LoanApplication loan = loanRepo.findById(loanId)
+                .orElseThrow(() -> new IllegalArgumentException("Loan tidak ditemukan: " + loanId));
+        LoanAggregate aggregate = LoanAggregate.load(loan, null);
+        aggregate.expireFunding();
+        loanRepo.save(loan);
     }
 
     private static BigDecimal getSaldo(String lenderId) {

@@ -4,7 +4,6 @@ import com.p2plending.domain.borrower.entity.LoanApplication;
 import com.p2plending.domain.borrower.repository.LoanRepository;
 import com.p2plending.domain.shared.LoanStatus;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 
 public class ApproveLoanUseCaseImpl implements ApproveLoanUseCase {
@@ -28,24 +27,18 @@ public class ApproveLoanUseCaseImpl implements ApproveLoanUseCase {
             throw new IllegalStateException("Hanya loan dengan status PENDING yang dapat diproses");
         }
 
+        com.p2plending.domain.borrower.aggregate.LoanAggregate aggregate = 
+            com.p2plending.domain.borrower.aggregate.LoanAggregate.load(loan, null);
+
         if (command.isApprove()) {
             // State transition: PENDING -> VERIFIED -> FUNDING
-            setLoanStatus(loan, LoanStatus.FUNDING);
+            aggregate.verify();
+            aggregate.openFunding();
         } else {
             // Rejected
-            setLoanStatus(loan, LoanStatus.CANCELLED);
+            aggregate.cancel();
         }
 
         loanRepository.save(loan);
-    }
-
-    private void setLoanStatus(LoanApplication loan, LoanStatus status) {
-        try {
-            Field field = LoanApplication.class.getDeclaredField("status");
-            field.setAccessible(true);
-            field.set(loan, status);
-        } catch (Exception e) {
-            throw new RuntimeException("Gagal set status loan", e);
-        }
     }
 }

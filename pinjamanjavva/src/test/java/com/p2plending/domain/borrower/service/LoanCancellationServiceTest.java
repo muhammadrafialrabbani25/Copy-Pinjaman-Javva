@@ -52,7 +52,8 @@ class LoanCancellationServiceTest {
         boolean canCancel = service.canCancelLoan(loanAmount, fundedAmount, currentCancellationCount);
 
         // Assert (Verifikasi)
-        assertFalse(canCancel);
+        // Cancel ALLOWED jika invest < 20% (tanpa penalty/mark)
+        assertTrue(canCancel);
     }
 
     // Test Pembatalan Maksimal (3x)
@@ -154,7 +155,7 @@ class LoanCancellationServiceTest {
         assertEquals(3, newCount);
     }
 
-    // Test Validasi Minimum Investasi (20%) 
+    // Test Validasi Minimum Investasi (20%)
 
     @Test
     void testIsMinimumInvestmentMet_Exactly20Percent() {

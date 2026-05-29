@@ -16,17 +16,17 @@ public class LoanApplication {
     private final LocalDateTime createdDate;
     private boolean minInvestedPercentageReached;
     private LocalDateTime cancelledDate;
-    
+
     public LoanApplication(String id, String borrowerId, Money amount, Tenor tenor, int creditScore) {
         this.id = id;
         this.borrowerId = borrowerId;
 
-        if (amount == null){
+        if (amount == null) {
             throw new IllegalArgumentException("masukan data valid");
         }
         this.amount = amount;
 
-        if (tenor == null){
+        if (tenor == null) {
             throw new IllegalArgumentException("masukan data valid");
         }
         this.tenor = tenor;
@@ -62,6 +62,10 @@ public class LoanApplication {
         return status;
     }
 
+    public void updateStatus(LoanStatus newStatus) {
+        this.status = newStatus;
+    }
+
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
@@ -72,6 +76,10 @@ public class LoanApplication {
 
     public LocalDateTime getCancelledDate() {
         return cancelledDate;
+    }
+
+    public void setCancelledDate(LocalDateTime cancelledDate) {
+        this.cancelledDate = cancelledDate;
     }
 
 }
