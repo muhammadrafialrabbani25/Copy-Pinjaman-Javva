@@ -2,6 +2,7 @@ package com.p2plending.infrastructure.persistence;
 
 import com.p2plending.domain.borrower.entity.Borrower;
 import com.p2plending.domain.borrower.entity.LoanApplication;
+import com.p2plending.domain.borrower.entity.Payment;
 import com.p2plending.domain.lender.entity.Investment;
 import com.p2plending.domain.lender.entity.Lender;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ public class SharedStorage {
     private final Map<String, LoanApplication> loans = new HashMap<>();
     private final Map<String, Lender> lenders = new HashMap<>();
     private final Map<String, Investment> investments = new HashMap<>();
+    private final Map<String, Payment> payments = new HashMap<>();
 
     private SharedStorage() {}
 
@@ -26,4 +28,5 @@ public class SharedStorage {
     public Map<String, LoanApplication> getLoans() { return loans; }
     public Map<String, Lender> getLenders() { return lenders; }
     public Map<String, Investment> getInvestments() { return investments; }
+    public Map<String, Payment> getPayments() { return payments; }
 }
