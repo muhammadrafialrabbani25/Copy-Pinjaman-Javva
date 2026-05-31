@@ -160,7 +160,7 @@ class RepaymentServiceTest {
 
         // Assert
         // Denda = 1% × 1000000 = 10000
-        assertEquals(new BigDecimal("10000"), denda);
+        assertEquals(0, new BigDecimal("10000").compareTo(denda));
     }
 
     @Test
@@ -203,7 +203,7 @@ class RepaymentServiceTest {
         BigDecimal denda = repaymentService.calculateDenda(principal, 40);
 
         // Assert
-        assertEquals(BigDecimal.ZERO, denda);
+        assertEquals(0, BigDecimal.ZERO.compareTo(denda));
     }
 
     // ============= calculateDendaForPayment Tests =============
@@ -240,7 +240,7 @@ class RepaymentServiceTest {
 
         // Assert
         // Denda = 1% × 1000000 = 10000
-        assertEquals(new BigDecimal("10000"), denda);
+        assertEquals(0, new BigDecimal("10000").compareTo(denda));
     }
 
     @Test

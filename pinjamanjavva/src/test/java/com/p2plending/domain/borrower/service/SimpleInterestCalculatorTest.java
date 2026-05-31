@@ -26,7 +26,7 @@ class SimpleInterestCalculatorTest {
 
         // Assert
         // 3% × 1000000 = 30000
-        assertEquals(new BigDecimal("30000"), interest);
+        assertEquals(0, new BigDecimal("30000").compareTo(interest));
     }
 
     @Test
@@ -38,7 +38,7 @@ class SimpleInterestCalculatorTest {
         BigDecimal interest = calculator.calculate(principal);
 
         // Assert
-        assertEquals(BigDecimal.ZERO, interest);
+        assertEquals(0, BigDecimal.ZERO.compareTo(interest));
     }
 
     @Test
@@ -51,7 +51,7 @@ class SimpleInterestCalculatorTest {
 
         // Assert
         // 3% × 100 = 3
-        assertEquals(new BigDecimal("3"), interest);
+        assertEquals(0, new BigDecimal("3").compareTo(interest));
     }
 
     @Test
@@ -64,7 +64,7 @@ class SimpleInterestCalculatorTest {
 
         // Assert
         // 3% × 100000000 = 3000000
-        assertEquals(new BigDecimal("3000000"), interest);
+        assertEquals(0, new BigDecimal("3000000").compareTo(interest));
     }
 
     @Test
@@ -109,7 +109,7 @@ class SimpleInterestCalculatorTest {
 
         // Assert
         assertNotNull(interest);
-        assertEquals(new BigDecimal("30000"), interest.getAmount());
+        assertEquals(0, new BigDecimal("30000").compareTo(interest.getAmount()));
         assertEquals("IDR", interest.getCurrency());
     }
 
@@ -123,7 +123,7 @@ class SimpleInterestCalculatorTest {
 
         // Assert
         assertNotNull(interest);
-        assertEquals(new BigDecimal("30"), interest.getAmount());
+        assertEquals(0, new BigDecimal("30").compareTo(interest.getAmount()));
         assertEquals("USD", interest.getCurrency());
     }
 
@@ -162,7 +162,7 @@ class SimpleInterestCalculatorTest {
 
         // Assert
         // Total interest for 12 months = 3% × 1000000 × 12 = 360000
-        assertEquals(new BigDecimal("360000"), totalInterestFor12Months);
+        assertEquals(0, new BigDecimal("360000").compareTo(totalInterestFor12Months));
     }
 
     // ============= getInterestRate Tests =============
