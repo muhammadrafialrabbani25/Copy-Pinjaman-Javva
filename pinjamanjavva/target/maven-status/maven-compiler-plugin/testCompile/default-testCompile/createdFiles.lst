@@ -1,0 +1,4 @@
+com\p2plending\infrastructure\persistence\InMemmoryLoanRepositoryTest.class
+com\p2plending\infrastructure\persistence\InMemmoryBorrowerRepositoryTest.class
+com\p2plending\infrastructure\persistence\InMemmoryInvestmentRepositoryTest.class
+com\p2plending\infrastructure\persistence\InMemmoryLenderRepositoryTest.class
