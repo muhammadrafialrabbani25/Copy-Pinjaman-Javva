@@ -42,8 +42,11 @@ import com.p2plending.infrastructure.persistence.SharedStorage;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class LendingApp {
+
+    private static final Logger LOGGER = Logger.getLogger(LendingApp.class.getName());
 
     private static final String KTP_IMAN  = "1111222233334444";
     private static final String KTP_BUDI  = "5555666677778888";
@@ -80,14 +83,14 @@ public class LendingApp {
     private static final String MSG_SEHARUSNYA_FAIL  = "[Hasil] Seharusnya gagal! [FAIL]";
     private static final String MSG_SEHARUSNYA_TOLAK = "[Hasil] Seharusnya ditolak! [FAIL]";
 
-    // Repositories
+    //Repositories
     private static InMemoryBorrowerRepository   borrowerRepo;
     private static InMemoryLoanRepository       loanRepo;
     private static InMemoryLenderRepository     lenderRepo;
     private static InMemoryInvestmentRepository investmentRepo;
     private static InMemmoryPaymentRepository   paymentRepo;
 
-    // Use Cases
+    //Use Cases
     private static RegisterBorrowerUseCase       registerBorrowerUseCase;
     private static ApplyLoanUseCaseImpl          applyLoanUseCase;
     private static ApproveLoanUseCaseImpl        approveLoanUseCase;
@@ -100,6 +103,15 @@ public class LendingApp {
 
     // =============================================================
     public static void main(String[] args) {
+    Logger rootLogger = Logger.getLogger("");
+    rootLogger.setLevel(java.util.logging.Level.INFO);
+    for (java.util.logging.Handler handler : rootLogger.getHandlers()) {
+        handler.setFormatter(new java.util.logging.Formatter() {
+            @Override
+            public String format(java.util.logging.LogRecord record) {
+                return record.getMessage() + "\n";
+            }
+        });
         printBanner();
 
         setUp();
@@ -161,7 +173,7 @@ public class LendingApp {
         setUp();
         edgeCase15BorrowerNotFoundApplyLoan();
 
-        System.out.println("\nSemua skenario selesai dijalankan!\n");
+        LOGGER.info("\nSemua skenario selesai dijalankan!\n");}
     }
 
 
@@ -199,50 +211,50 @@ public class LendingApp {
     // SKENARIO 1 — HAPPY PATH
 
     private static void scenario1HappyPath() {
-        System.out.println("[SKENARIO 1] HAPPY PATH - Loan berhasil dicairkan (DISBURSED)");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[SKENARIO 1] HAPPY PATH - Loan berhasil dicairkan (DISBURSED)");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
                 ALAMAT_IMAN, 10_000_000L, 750));
-        System.out.printf("[Borrower] Terdaftar: %s | id: %s%n", iman.getNama(), iman.getId());
+        LOGGER.info(String.format("[Borrower] Terdaftar: %s | id: %s%n", iman.getNama(), iman.getId()));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
-        System.out.printf("Loan diajukan: %s | Rp 30.000.000 | 6 bulan%n", loan.getId());
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format("Loan diajukan: %s | Rp 30.000.000 | 6 bulan%n", loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
                 NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
                 ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("50000000")));
-        System.out.printf("Lender Terdaftar: %s | saldo: Rp 50.000.000%n", budi.getNama());
+        LOGGER.info(String.format("Lender Terdaftar: %s | saldo: Rp 50.000.000%n", budi.getNama()));
 
         investLoanUseCase.execute(
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("30000000")));
-        System.out.println("Invest BUDI invest Rp 30.000.000 (100%)");
+        LOGGER.info("Invest BUDI invest Rp 30.000.000 (100%)");
 
         BigDecimal saldoBudiSetelah = lenderRepo.findById(budi.getId())
                 .orElseThrow(() -> new IllegalStateException("Lender tidak ditemukan"))
                 .getSaldo().getAmount();
-        System.out.printf("Saldo BUDI sisa: Rp %,.0f%n", saldoBudiSetelah);
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format("Saldo BUDI sisa: Rp %,.0f%n", saldoBudiSetelah));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
-        System.out.println("\nHasil Skenario 1");
-        System.out.printf("Loan status : %s%n", getLoanStatus(loan.getId()));
-        System.out.printf("Saldo BUDI  : Rp %,.0f (berkurang 30jt)%n", saldoBudiSetelah);
+        LOGGER.info("\nHasil Skenario 1");
+        LOGGER.info(String.format("Loan status : %s%n", getLoanStatus(loan.getId())));
+        LOGGER.info(String.format("Saldo BUDI  : Rp %,.0f (berkurang 30jt)%n", saldoBudiSetelah));
     }
 
     // SKENARIO 2 — PAYMENT ON TIME
 
     private static void scenario2PaymentOnTime() {
-        System.out.println("[SKENARIO 2] PAYMENT ON TIME - Borrower bayar cicilan tepat waktu");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[SKENARIO 2] PAYMENT ON TIME - Borrower bayar cicilan tepat waktu");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -250,7 +262,7 @@ public class LendingApp {
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
-        System.out.printf("Loan Diajukan: %s | Rp 12.000.000 | 12 bulan%n", loan.getId());
+        LOGGER.info(String.format("Loan Diajukan: %s | Rp 12.000.000 | 12 bulan%n", loan.getId()));
 
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
@@ -260,17 +272,17 @@ public class LendingApp {
 
         investLoanUseCase.execute(
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
-        System.out.printf("Schedule %d cicilan digenerate%n", schedule.size());
+        LOGGER.info(String.format("Schedule %d cicilan digenerate%n", schedule.size()));
 
         PaymentDTO firstPaymentDTO = schedule.get(0);
-        System.out.printf("Payment Cicilan bulan 1 : Rp %,.0f | Due: %s | Status: %s%n",
-                firstPaymentDTO.getAmount(), firstPaymentDTO.getDueDate(), firstPaymentDTO.getStatus());
+        LOGGER.info(String.format("Payment Cicilan bulan 1 : Rp %,.0f | Due: %s | Status: %s%n",
+                firstPaymentDTO.getAmount(), firstPaymentDTO.getDueDate(), firstPaymentDTO.getStatus()));
 
         MakePaymentCommand paymentCommand = new MakePaymentCommand(
                 iman.getId(),
@@ -279,17 +291,17 @@ public class LendingApp {
         );
         PaymentDTO result = makePaymentUseCase.execute(paymentCommand);
 
-        System.out.println("\nHasil Skenario 2");
-        System.out.printf("Payment status : %s %n", result.getStatus());
-        System.out.printf("Paid date      : %s %n", result.getPaidDate());
-        System.out.printf("Denda          : Rp %,.0f (tidak ada denda) %n", result.getDenda());
+        LOGGER.info("\nHasil Skenario 2");
+        LOGGER.info(String.format("Payment status : %s %n", result.getStatus()));
+        LOGGER.info(String.format("Paid date      : %s %n", result.getPaidDate()));
+        LOGGER.info(String.format("Denda          : Rp %,.0f (tidak ada denda) %n", result.getDenda()));
     }
 
     // SKENARIO 3 — PAYMENT OVERDUE + DENDA
 
     private static void scenario3PaymentOverdue() {
-        System.out.println("[SKENARIO 3] PAYMENT OVERDUE - Telat 40 hari, denda 1% pokok");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[SKENARIO 3] PAYMENT OVERDUE - Telat 40 hari, denda 1% pokok");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -297,7 +309,7 @@ public class LendingApp {
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
-        System.out.printf("Loan diajukan: %s | Rp 12.000.000 | 12 bulan%n", loan.getId());
+        LOGGER.info(String.format("Loan diajukan: %s | Rp 12.000.000 | 12 bulan%n", loan.getId()));
 
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
@@ -309,10 +321,10 @@ public class LendingApp {
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
 
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
-        System.out.printf("Schedule %d cicilan digenerate%n", schedule.size());
+        LOGGER.info(String.format("Schedule %d cicilan digenerate%n", schedule.size()));
 
         String firstPaymentId = schedule.get(0).getId();
         Payment firstPayment = paymentRepo.findById(firstPaymentId)
@@ -327,14 +339,14 @@ public class LendingApp {
                 LocalDate.now().minusDays(40)
         );
         paymentRepo.save(overduePayment);
-        System.out.println("Simulasi: Due date diubah ke 40 hari lalu");
+        LOGGER.info("Simulasi: Due date diubah ke 40 hari lalu");
 
         BigDecimal pokok         = overduePayment.getAmount().getAmount();
         BigDecimal expectedDenda = pokok.multiply(new BigDecimal("0.01"));
         BigDecimal totalBayar    = pokok.add(expectedDenda);
 
-        System.out.printf("Denda 1%% x Rp %,.0f = Rp %,.2f%n", pokok, expectedDenda);
-        System.out.printf("Total Rp %,.0f + Rp %,.2f = Rp %,.2f%n", pokok, expectedDenda, totalBayar);
+        LOGGER.info(String.format("Denda 1%% x Rp %,.0f = Rp %,.2f%n", pokok, expectedDenda));
+        LOGGER.info(String.format("Total Rp %,.0f + Rp %,.2f = Rp %,.2f%n", pokok, expectedDenda, totalBayar));
 
         MakePaymentCommand paymentCommand = new MakePaymentCommand(
                 iman.getId(),
@@ -343,18 +355,18 @@ public class LendingApp {
         );
         PaymentDTO result = makePaymentUseCase.execute(paymentCommand);
 
-        System.out.println("\nHasil Skenario 3");
-        System.out.printf("Payment status : %s %n", result.getStatus());
-        System.out.printf("Paid date      : %s %n", result.getPaidDate());
-        System.out.printf("Denda > 0      : %s %n", result.getDenda().compareTo(BigDecimal.ZERO) > 0);
-        System.out.printf("Denda applied  : Rp %,.2f%n", result.getDenda());
+        LOGGER.info("\nHasil Skenario 3");
+        LOGGER.info(String.format("Payment status : %s %n", result.getStatus()));
+        LOGGER.info(String.format("Paid date      : %s %n", result.getPaidDate()));
+        LOGGER.info(String.format("Denda > 0      : %s %n", result.getDenda().compareTo(BigDecimal.ZERO) > 0));
+        LOGGER.info(String.format("Denda applied  : Rp %,.2f%n", result.getDenda()));
     }
 
     // EDGE CASE 4 — Admin reject loan -> CANCELLED
 
     private static void edgeCase4AdminRejectLoan() {
-        System.out.println("[EDGE CASE 4] Admin reject loan -> status CANCELLED");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 4] Admin reject loan -> status CANCELLED");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -366,16 +378,16 @@ public class LendingApp {
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), false));
 
         LoanStatus status = getLoanStatus(loan.getId());
-        System.out.printf(FMT_STATUS, status);
-        System.out.printf("Hasil Loan status CANCELLED : %s %n", status == LoanStatus.CANCELLED);
+        LOGGER.info(String.format(FMT_STATUS, status));
+        LOGGER.info(String.format("Hasil Loan status CANCELLED : %s %n", status == LoanStatus.CANCELLED));
     }
 
 
     // EDGE CASE 5 — Borrower cancel -> counter +1
 
     private static void edgeCase5CancellationCounterIncremented() {
-        System.out.println("[EDGE CASE 5] Borrower cancel loan -> counter +1");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 5] Borrower cancel loan -> counter +1");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -403,19 +415,19 @@ public class LendingApp {
         Borrower borrower         = borrowerRepo.findById(iman.getId())
                 .orElseThrow(() -> new IllegalStateException(MSG_BORROWER_NOT_FOUND));
 
-        System.out.printf(FMT_STATUS, loanStatus);
-        System.out.println(FMT_HASIL);
-        System.out.printf("Loan status CANCELLED      : %s %n", loanStatus == LoanStatus.CANCELLED);
-        System.out.printf("cancelledDate tidak null   : %s %n", cancelled.getCancelledDate() != null);
-        System.out.printf("Counter %d -> %d (+1)       : %s %n", countBefore, countAfter, countAfter == countBefore + 1);
-        System.out.printf("Belum diblokir             : %s %n", borrower.getLastBlockedDate() == null);
+        LOGGER.info(String.format(FMT_STATUS, loanStatus));
+        LOGGER.info(FMT_HASIL);
+        LOGGER.info(String.format("Loan status CANCELLED      : %s %n", loanStatus == LoanStatus.CANCELLED));
+        LOGGER.info(String.format("cancelledDate tidak null   : %s %n", cancelled.getCancelledDate() != null));
+        LOGGER.info(String.format("Counter %d -> %d (+1)       : %s %n", countBefore, countAfter, countAfter == countBefore + 1));
+        LOGGER.info(String.format("Belum diblokir             : %s %n", borrower.getLastBlockedDate() == null));
     }
 
     // EDGE CASE 6 — 3x cancel -> borrower diblokir 4 bulan
 
     private static void edgeCase6ThreeTimesCancelBorrowerBlocked() {
-        System.out.println("[EDGE CASE 6] 3x cancel -> borrower diblokir 4 bulan");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 6] 3x cancel -> borrower diblokir 4 bulan");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -432,21 +444,21 @@ public class LendingApp {
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_6JT)));
             cancelLoanUseCase.execute(new CancelLoanCommand(
                     iman.getId(), loan.getId(), new Money(new BigDecimal(NOMINAL_6JT), "IDR")));
-            System.out.printf("Cancel ke-%d : count = %d%n", i, getCancellationCount(iman.getId()));
+            LOGGER.info(String.format("Cancel ke-%d : count = %d%n", i, getCancellationCount(iman.getId())));
         }
 
         Borrower borrowerAfter = borrowerRepo.findById(iman.getId())
                 .orElseThrow(() -> new IllegalStateException(MSG_BORROWER_NOT_FOUND));
-        System.out.println(FMT_HASIL);
-        System.out.printf("Cancellation count = 3     : %s %n", borrowerAfter.getCancellationCount() == 3);
-        System.out.printf("lastBlockedDate tidak null : %s %n", borrowerAfter.getLastBlockedDate() != null);
+        LOGGER.info(FMT_HASIL);
+        LOGGER.info(String.format("Cancellation count = 3     : %s %n", borrowerAfter.getCancellationCount() == 3));
+        LOGGER.info(String.format("lastBlockedDate tidak null : %s %n", borrowerAfter.getLastBlockedDate() != null));
     }
 
     // EDGE CASE 7 — Cancel jika funded < 20% -> tanpa penalty
 
     private static void edgeCase7CancelIfFundedLessThan20Percent() {
-        System.out.println("[EDGE CASE 7] Cancel jika funded < 20% -> tanpa penalty");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 7] Cancel jika funded < 20% -> tanpa penalty");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -460,15 +472,15 @@ public class LendingApp {
                 iman.getId(), loan.getId(), new Money(new BigDecimal(NOMINAL_5JT), "IDR")));
 
         LoanStatus status = getLoanStatus(loan.getId());
-        System.out.printf(FMT_STATUS, status);
-        System.out.printf("Hasil Loan status CANCELLED : %s %n", status == LoanStatus.CANCELLED);
+        LOGGER.info(String.format(FMT_STATUS, status));
+        LOGGER.info(String.format("Hasil Loan status CANCELLED : %s %n", status == LoanStatus.CANCELLED));
     }
 
     // EDGE CASE 8 — Tidak bisa cancel setelah 3x (blocked)
 
     private static void edgeCase8CannotCancelAfterMaxCancellations() {
-        System.out.println("[EDGE CASE 8] Tidak bisa cancel setelah 3x cancel (blokir)");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 8] Tidak bisa cancel setelah 3x cancel (blokir)");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -489,16 +501,16 @@ public class LendingApp {
 
         Borrower blockedBorrower = borrowerRepo.findById(iman.getId())
                 .orElseThrow(() -> new IllegalStateException(MSG_BORROWER_NOT_FOUND));
-        System.out.println(FMT_HASIL);
-        System.out.printf("Cancellation count = 3     : %s %n", blockedBorrower.getCancellationCount() == 3);
-        System.out.printf("lastBlockedDate tidak null : %s %n", blockedBorrower.getLastBlockedDate() != null);
+        LOGGER.info(FMT_HASIL);
+        LOGGER.info(String.format("Cancellation count = 3     : %s %n", blockedBorrower.getCancellationCount() == 3));
+        LOGGER.info(String.format("lastBlockedDate tidak null : %s %n", blockedBorrower.getLastBlockedDate() != null));
     }
 
     // EDGE CASE 9 — Loan tidak terfund -> EXPIRED_FUNDING
 
     private static void edgeCase9ExpiredFunding() {
-        System.out.println("[EDGE CASE 9] Loan tidak terfund -> EXPIRED_FUNDING");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 9] Loan tidak terfund -> EXPIRED_FUNDING");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_KEMAL, TELEPON_KEMAL, KTP_KEMAL,
@@ -508,20 +520,20 @@ public class LendingApp {
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
 
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
         expireLoanFunding(loan.getId());
-        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
+        LOGGER.info(String.format(FMT_STATUS, getLoanStatus(loan.getId())));
 
-        System.out.printf("Hasi Loan status EXPIRED_FUNDING : %s %n",
-                getLoanStatus(loan.getId()) == LoanStatus.EXPIRED_FUNDING);
+        LOGGER.info(String.format("Hasi Loan status EXPIRED_FUNDING : %s %n",
+                getLoanStatus(loan.getId()) == LoanStatus.EXPIRED_FUNDING));
     }
 
     // EDGE CASE 10 — Loan EXPIRED tidak bisa di-disburse
 
     private static void edgeCase10ExpiredLoanCannotBeDisbursed() {
-        System.out.println("[EDGE CASE 10] Loan EXPIRED tidak bisa di-disburse");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 10] Loan EXPIRED tidak bisa di-disburse");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_KEMAL, TELEPON_KEMAL, KTP_KEMAL,
@@ -533,18 +545,18 @@ public class LendingApp {
 
         try {
             disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-            System.out.println(MSG_SEHARUSNYA_FAIL);
+            LOGGER.info(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalStateException e) {
-            System.out.printf("Hasil Disburse ditolak dengan IllegalStateException %n");
-            System.out.printf(FMT_PESAN, e.getMessage());
+            LOGGER.info(String.format("Hasil Disburse ditolak dengan IllegalStateException %n"));
+            LOGGER.info(String.format(FMT_PESAN, e.getMessage()));
         }
     }
 
     // EDGE CASE 11 — Loan EXPIRED tidak bisa di-approve ulang
 
     private static void edgeCase11ExpiredLoanCannotBeReapproved() {
-        System.out.println("[EDGE CASE 11] Loan EXPIRED tidak bisa di-approve ulang");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 11] Loan EXPIRED tidak bisa di-approve ulang");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_KEMAL, TELEPON_KEMAL, KTP_KEMAL,
@@ -556,18 +568,18 @@ public class LendingApp {
 
         try {
             approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-            System.out.println(MSG_SEHARUSNYA_FAIL);
+            LOGGER.info(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalStateException e) {
-            System.out.printf("Hasil Approve ditolak dengan IllegalStateException %n");
-            System.out.printf(FMT_PESAN, e.getMessage());
+            LOGGER.info(String.format("Hasil Approve ditolak dengan IllegalStateException %n"));
+            LOGGER.info(String.format(FMT_PESAN, e.getMessage()));
         }
     }
 
     // EDGE CASE 12 — Invest < 20% -> ditolak
 
     private static void edgeCase12InvestLessThan20PercentRejected() {
-        System.out.println("[EDGE CASE 12] Lender invest < 20% dari loan -> ditolak");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 12] Lender invest < 20% dari loan -> ditolak");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -583,18 +595,18 @@ public class LendingApp {
         try {
             investLoanUseCase.execute(
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_5JT)));
-            System.out.println(MSG_SEHARUSNYA_TOLAK);
+            LOGGER.info(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
-            System.out.printf(INVEST_DITOLAK);
-            System.out.printf(FMT_PESAN, e.getMessage());
+            LOGGER.info(String.format(INVEST_DITOLAK));
+            LOGGER.info(String.format(FMT_PESAN, e.getMessage()));
         }
     }
 
     // EDGE CASE 13 — Saldo lender tidak cukup -> invest ditolak
 
     private static void edgeCase13InsufficientSaldoInvestRejected() {
-        System.out.println("[EDGE CASE 13] Lender saldo tidak cukup -> invest ditolak");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 13] Lender saldo tidak cukup -> invest ditolak");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -610,18 +622,18 @@ public class LendingApp {
         try {
             investLoanUseCase.execute(
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_6JT)));
-            System.out.println(MSG_SEHARUSNYA_TOLAK);
+            LOGGER.info(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
-            System.out.printf(INVEST_DITOLAK);
-            System.out.printf(FMT_PESAN, e.getMessage());
+            LOGGER.info(String.format(INVEST_DITOLAK));
+            LOGGER.info(String.format(FMT_PESAN, e.getMessage()));
         }
     }
 
     // EDGE CASE 14 — Invest ke loan bukan status FUNDING -> ditolak
 
     private static void edgeCase14InvestToNonFundingLoanRejected() {
-        System.out.println("[EDGE CASE 14] Invest ke loan bukan status FUNDING -> ditolak");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 14] Invest ke loan bukan status FUNDING -> ditolak");
+        LOGGER.info("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
@@ -637,26 +649,26 @@ public class LendingApp {
         try {
             investLoanUseCase.execute(
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("10000000")));
-            System.out.println(MSG_SEHARUSNYA_TOLAK);
+            LOGGER.info(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
-            System.out.printf(INVEST_DITOLAK);
-            System.out.printf(FMT_PESAN, e.getMessage());
+            LOGGER.info(String.format(INVEST_DITOLAK));
+            LOGGER.info(String.format(FMT_PESAN, e.getMessage()));
         }
     }
 
     // EDGE CASE 15 — Borrower tidak ditemukan saat apply -> exception
 
     private static void edgeCase15BorrowerNotFoundApplyLoan() {
-        System.out.println("[EDGE CASE 15] Borrower tidak ditemukan saat apply -> exception");
-        System.out.println("-".repeat(55));
+        LOGGER.info("[EDGE CASE 15] Borrower tidak ditemukan saat apply -> exception");
+        LOGGER.info("-".repeat(55));
 
         try {
             applyLoanUseCase.execute(
                     new ApplyLoanCommand("BORROWER-TIDAK-ADA", 10_000_000L, 6));
-            System.out.println(MSG_SEHARUSNYA_FAIL);
+            LOGGER.info(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalArgumentException e) {
-            System.out.printf("Apply ditolak dengan IllegalArgumentException %n");
-            System.out.printf(FMT_PESAN, e.getMessage());
+            LOGGER.info(String.format("Apply ditolak dengan IllegalArgumentException %n"));
+            LOGGER.info(String.format(FMT_PESAN, e.getMessage()));
         }
     }
 
@@ -682,13 +694,14 @@ public class LendingApp {
                 .map(Borrower::getCancellationCount)
                 .orElse(-1);
     }
+    
 
     private static void printBanner() {
-        System.out.println("P2P LENDING PLATFORM  -  DEMO CLI");
-        System.out.println();
+        LOGGER.info("P2P LENDING PLATFORM  -  DEMO CLI");
+        LOGGER.info("");
     }
 
     private static void separator() {
-        System.out.println("\n" + "=".repeat(57) + "\n");
+        LOGGER.info("\n" + "=".repeat(57) + "\n");
     }
 }
