@@ -82,36 +82,32 @@ class EndToEndFlowTest {
 
     @BeforeEach
     void setUp() {
-        // Bersihkan storage sebelum tiap test
         SharedStorage.getInstance().getBorrowers().clear();
         SharedStorage.getInstance().getLoans().clear();
         SharedStorage.getInstance().getLenders().clear();
         SharedStorage.getInstance().getInvestments().clear();
         SharedStorage.getInstance().getPayments().clear();
 
-        // Inisialisasi repository
         borrowerRepo   = new InMemoryBorrowerRepository();
         loanRepo       = new InMemoryLoanRepository();
         lenderRepo     = new InMemoryLenderRepository();
         investmentRepo = new InMemoryInvestmentRepository();
         paymentRepo    = new InMemmoryPaymentRepository();
 
-        // Inisialisasi service
         LoanApprovalService     loanApprovalService     = new LoanApprovalService();
         LoanCancellationService loanCancellationService = new LoanCancellationService();
         InvestmentService       investmentService       = new InvestmentService();
         RepaymentService        repaymentService        = new RepaymentService();
         PaymentScheduleService  paymentScheduleService  = new PaymentScheduleService();
 
-        // Inisialisasi use case
-        registerBorrowerUseCase  = new RegisterBorrowerUseCase(borrowerRepo);
-        applyLoanUseCase         = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
-        approveLoanUseCase       = new ApproveLoanUseCaseImpl(loanRepo);
-        disburseUseCase          = new DisburseUseCaseImpl(loanRepo);
-        cancelLoanUseCase        = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
-        registerLenderUseCase    = new RegisterLenderUseCaseImpl(lenderRepo);
-        investLoanUseCase        = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);
-        makePaymentUseCase       = new MakePaymentUseCaseImpl(borrowerRepo, loanRepo, paymentRepo, repaymentService);
+        registerBorrowerUseCase   = new RegisterBorrowerUseCase(borrowerRepo);
+        applyLoanUseCase          = new ApplyLoanUseCaseImpl(borrowerRepo, loanRepo, loanApprovalService);
+        approveLoanUseCase        = new ApproveLoanUseCaseImpl(loanRepo);
+        disburseUseCase           = new DisburseUseCaseImpl(loanRepo);
+        cancelLoanUseCase         = new CancelLoanUseCaseImpl(borrowerRepo, loanRepo, loanCancellationService, investmentRepo);
+        registerLenderUseCase     = new RegisterLenderUseCaseImpl(lenderRepo);
+        investLoanUseCase         = new InvestLoanUseCaseImpl(lenderRepo, loanRepo, investmentRepo, investmentService);
+        makePaymentUseCase        = new MakePaymentUseCaseImpl(borrowerRepo, loanRepo, paymentRepo, repaymentService);
         getPaymentScheduleUseCase = new GetPaymentScheduleUseCaseImpl(borrowerRepo, loanRepo, paymentRepo, paymentScheduleService);
     }
 
@@ -152,10 +148,117 @@ class EndToEndFlowTest {
         assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()));
     }
 
+    // SKENARIO 2 — PAYMENT ON TIME
+
     @Test
     @Order(2)
-    @DisplayName("Skenario 1b: Admin reject loan → status CANCELLED")
-    void scenario1b_adminRejectLoan_statusCancelled() {
+    @DisplayName("Skenario 2: Borrower bayar cicilan tepat waktu → status PAID")
+    void scenario2_paymentOnTime_statusPaid() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 750));
+
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
+
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+
+        investLoanUseCase.execute(
+                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
+
+        assertEquals(LoanStatus.FUNDED, getLoanStatus(loan.getId()));
+
+        disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
+        assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()));
+
+        List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
+        assertNotNull(schedule);
+        assertFalse(schedule.isEmpty());
+        assertEquals(12, schedule.size());
+
+        PaymentDTO firstPaymentDTO = schedule.get(0);
+        assertEquals("PENDING", firstPaymentDTO.getStatus());
+
+        MakePaymentCommand paymentCommand = new MakePaymentCommand(
+                iman.getId(),
+                firstPaymentDTO.getId(),
+                new Money(firstPaymentDTO.getAmount(), "IDR")
+        );
+        PaymentDTO result = makePaymentUseCase.execute(paymentCommand);
+
+        assertEquals("PAID", result.getStatus());
+        assertNotNull(result.getPaidDate());
+        assertEquals(BigDecimal.ZERO, result.getDenda());
+    }
+
+    // SKENARIO 3 — PAYMENT OVERDUE + DENDA
+
+    @Test
+    @Order(3)
+    @DisplayName("Skenario 3: Payment telat 40 hari → status OVERDUE, denda 1% pokok")
+    void scenario3_paymentOverdue_dendaApplied() {
+        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
+                "Iman Santoso", "081111111111", KTP_IMAN,
+                "Jl. Merdeka No. 1", 10_000_000L, 750));
+
+        LoanDTO loan = applyLoanUseCase.execute(
+                new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
+
+        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
+
+        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
+                "Budi Investor", "082222222222", KTP_BUDI,
+                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+
+        investLoanUseCase.execute(
+                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
+
+        disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
+        assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()));
+
+        List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
+        assertNotNull(schedule);
+        assertFalse(schedule.isEmpty());
+
+        String firstPaymentId = schedule.get(0).getId();
+        Payment firstPayment = paymentRepo.findById(firstPaymentId).get();
+
+        Payment overduePayment = new Payment(
+                firstPayment.getId(),
+                firstPayment.getLoanId(),
+                firstPayment.getNoBulan(),
+                firstPayment.getAmount(),
+                LocalDate.now().minusDays(40)
+        );
+        paymentRepo.save(overduePayment);
+
+        BigDecimal pokok = overduePayment.getAmount().getAmount();
+        BigDecimal expectedDenda = pokok.multiply(new BigDecimal("0.01"));
+        BigDecimal totalBayar = pokok.add(expectedDenda);
+
+        MakePaymentCommand paymentCommand = new MakePaymentCommand(
+                iman.getId(),
+                firstPaymentId,
+                new Money(totalBayar, "IDR")
+        );
+        PaymentDTO result = makePaymentUseCase.execute(paymentCommand);
+
+        assertEquals("PAID", result.getStatus());
+        assertNotNull(result.getPaidDate());
+        assertTrue(result.getDenda().compareTo(BigDecimal.ZERO) > 0);
+    }
+
+
+    // EDGE CASES
+
+    @Test
+    @Order(4)
+    @DisplayName("Edge case: Admin reject loan → status CANCELLED")
+    void edgeCase_adminRejectLoan_statusCancelled() {
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Iman Santoso", "081111111111", KTP_IMAN,
                 "Jl. Merdeka No. 1", 10_000_000L, 700));
@@ -167,12 +270,10 @@ class EndToEndFlowTest {
         assertEquals(LoanStatus.CANCELLED, getLoanStatus(loan.getId()));
     }
 
-    // SKENARIO 2 — CANCELLATION
-
     @Test
-    @Order(3)
-    @DisplayName("Skenario 2: Borrower cancel loan → status CANCELLED, counter +1")
-    void scenario2_cancellation_counterIncremented() {
+    @Order(5)
+    @DisplayName("Edge case: Borrower cancel loan → status CANCELLED, counter +1")
+    void edgeCase_cancellation_counterIncremented() {
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Iman Santoso", "081111111111", KTP_IMAN,
                 "Jl. Merdeka No. 1", 10_000_000L, 700));
@@ -206,9 +307,9 @@ class EndToEndFlowTest {
     }
 
     @Test
-    @Order(4)
-    @DisplayName("Skenario 2b: 3x cancel → borrower diblokir 4 bulan")
-    void scenario2b_threeTimesCancel_borrowerBlocked() {
+    @Order(6)
+    @DisplayName("Edge case: 3x cancel → borrower diblokir 4 bulan")
+    void edgeCase_threeTimesCancel_borrowerBlocked() {
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Iman Santoso", "081111111111", KTP_IMAN,
                 "Jl. Merdeka No. 1", 10_000_000L, 750));
@@ -233,9 +334,9 @@ class EndToEndFlowTest {
     }
 
     @Test
-    @Order(5)
-    @DisplayName("Skenario 2c: Cancel BISA jika funded < 20% — tanpa penalty")
-    void scenario2c_canCancel_ifFundedLessThan20Percent_NoPenalty() {
+    @Order(7)
+    @DisplayName("Edge case: Cancel BISA jika funded < 20% — tanpa penalty")
+    void edgeCase_canCancel_ifFundedLessThan20Percent_NoPenalty() {
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Iman Santoso", "081111111111", KTP_IMAN,
                 "Jl. Merdeka No. 1", 10_000_000L, 700));
@@ -251,9 +352,9 @@ class EndToEndFlowTest {
     }
 
     @Test
-    @Order(6)
-    @DisplayName("Skenario 2d: Cancel tidak bisa setelah 3x cancel (blokir)")
-    void scenario2d_cannotCancel_afterMaxCancellations() {
+    @Order(8)
+    @DisplayName("Edge case: Cancel tidak bisa setelah 3x cancel (blokir)")
+    void edgeCase_cannotCancel_afterMaxCancellations() {
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Iman Santoso", "081111111111", KTP_IMAN,
                 "Jl. Merdeka No. 1", 10_000_000L, 750));
@@ -276,12 +377,10 @@ class EndToEndFlowTest {
         assertNotNull(blockedBorrower.getLastBlockedDate());
     }
 
-    //SKENARIO 3 — EXPIRED FUNDING
-
     @Test
-    @Order(7)
-    @DisplayName("Skenario 3: Loan tidak terfund → EXPIRED_FUNDING via State Pattern")
-    void scenario3_expiredFunding_statusSetCorrectly() {
+    @Order(9)
+    @DisplayName("Edge case: Loan tidak terfund → EXPIRED_FUNDING via State Pattern")
+    void edgeCase_expiredFunding_statusSetCorrectly() {
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Kemal Peminjam", "085555555555", KTP_KEMAL,
                 "Jl. Kuningan No. 7", 5_000_000L, 650));
@@ -297,9 +396,9 @@ class EndToEndFlowTest {
     }
 
     @Test
-    @Order(8)
-    @DisplayName("Skenario 3b: Loan EXPIRED tidak bisa di-disburse")
-    void scenario3b_expiredLoan_cannotBeDisbursed() {
+    @Order(10)
+    @DisplayName("Edge case: Loan EXPIRED tidak bisa di-disburse")
+    void edgeCase_expiredLoan_cannotBeDisbursed() {
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Kemal Peminjam", "085555555555", KTP_KEMAL,
                 "Jl. Kuningan No. 7", 5_000_000L, 650));
@@ -313,9 +412,9 @@ class EndToEndFlowTest {
     }
 
     @Test
-    @Order(9)
-    @DisplayName("Skenario 3c: Loan EXPIRED tidak bisa di-approve ulang")
-    void scenario3c_expiredLoan_cannotBeReapproved() {
+    @Order(11)
+    @DisplayName("Edge case: Loan EXPIRED tidak bisa di-approve ulang")
+    void edgeCase_expiredLoan_cannotBeReapproved() {
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
                 "Kemal Peminjam", "085555555555", KTP_KEMAL,
                 "Jl. Kuningan No. 7", 5_000_000L, 650));
@@ -327,128 +426,6 @@ class EndToEndFlowTest {
         assertThrows(IllegalStateException.class,
                 () -> approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true)));
     }
-
-    // SKENARIO 4 — PAYMENT ON TIME
-
-    @Test
-    @Order(10)
-    @DisplayName("Skenario 4: Borrower bayar cicilan tepat waktu → status PAID")
-    void scenario4_paymentOnTime_statusPaid() {
-        // Setup: register, apply, approve, invest, disburse
-        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
-
-        LoanDTO loan = applyLoanUseCase.execute(
-                new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
-
-        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-
-        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
-
-        investLoanUseCase.execute(
-                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
-
-        assertEquals(LoanStatus.FUNDED, getLoanStatus(loan.getId()));
-
-        disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()));
-
-        // Ambil jadwal cicilan
-        List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
-        assertNotNull(schedule);
-        assertFalse(schedule.isEmpty());
-        assertEquals(12, schedule.size()); // tenor 12 bulan = 12 cicilan
-
-        // Ambil cicilan pertama
-        PaymentDTO firstPaymentDTO = schedule.get(0);
-        assertEquals("PENDING", firstPaymentDTO.getStatus());
-
-        // Bayar cicilan pertama — amount = pokok cicilan (tidak overdue, denda = 0)
-        MakePaymentCommand paymentCommand = new MakePaymentCommand(
-                iman.getId(),
-                firstPaymentDTO.getId(),
-                new Money(firstPaymentDTO.getAmount(), "IDR")
-        );
-        PaymentDTO result = makePaymentUseCase.execute(paymentCommand);
-
-        // Pastikan status jadi PAID
-        assertEquals("PAID", result.getStatus());
-        assertNotNull(result.getPaidDate());
-        assertEquals(BigDecimal.ZERO, result.getDenda());
-    }
-
-    // SKENARIO 5 — PAYMENT OVERDUE + DENDA
-
-    @Test
-    @Order(11)
-    @DisplayName("Skenario 5: Payment telat 40 hari → status OVERDUE, denda 1% pokok")
-    void scenario5_paymentOverdue_dendaApplied() {
-        // Setup: register, apply, approve, invest, disburse
-        BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
-
-        LoanDTO loan = applyLoanUseCase.execute(
-                new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
-
-        approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-
-        LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
-
-        investLoanUseCase.execute(
-                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
-
-        disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        assertEquals(LoanStatus.DISBURSED, getLoanStatus(loan.getId()));
-
-        // Generate jadwal cicilan
-        List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
-        assertNotNull(schedule);
-        assertFalse(schedule.isEmpty());
-
-        // Ambil cicilan pertama dari repository langsung
-        // supaya bisa manipulasi due date jadi 40 hari yang lalu
-        String firstPaymentId = schedule.get(0).getId();
-        Payment firstPayment = paymentRepo.findById(firstPaymentId).get();
-
-        // Simulasi payment sudah telat 40 hari
-        // dengan membuat payment baru dengan due date 40 hari lalu
-        Payment overduePayment = new Payment(
-                firstPayment.getId(),
-                firstPayment.getLoanId(),
-                firstPayment.getNoBulan(),
-                firstPayment.getAmount(),
-                LocalDate.now().minusDays(40) // due date 40 hari lalu
-        );
-        paymentRepo.save(overduePayment); // overwrite dengan yang overdue
-
-        // Hitung total yang harus dibayar: pokok + denda (1% dari pokok)
-        BigDecimal pokok = overduePayment.getAmount().getAmount();
-        BigDecimal expectedDenda = pokok.multiply(new BigDecimal("0.01"));
-        BigDecimal totalBayar = pokok.add(expectedDenda);
-
-        // Bayar cicilan yang sudah overdue
-        MakePaymentCommand paymentCommand = new MakePaymentCommand(
-                iman.getId(),
-                firstPaymentId,
-                new Money(totalBayar, "IDR")
-        );
-        PaymentDTO result = makePaymentUseCase.execute(paymentCommand);
-
-        // Pastikan status PAID setelah dibayar
-        assertEquals("PAID", result.getStatus());
-        assertNotNull(result.getPaidDate());
-
-        // Pastikan denda dihitung dengan benar (1% dari pokok)
-        assertTrue(result.getDenda().compareTo(BigDecimal.ZERO) > 0);
-    }
-
-    // EDGE CASES
 
     @Test
     @Order(12)
