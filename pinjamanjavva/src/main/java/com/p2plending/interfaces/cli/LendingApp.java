@@ -50,6 +50,11 @@ public class LendingApp {
     private static final String KTP_BUDI  = "5555666677778888";
     private static final String KTP_KEMAL = "3333444455556666";
 
+    private static final String TELEPON_KEMAL       = "085555555555";
+    private static final String ALAMAT_KEMAL        = "Jl. Kuningan No. 7";
+    private static final String MSG_SEHARUSNYA_FAIL = "[Hasil] Seharusnya gagal! [FAIL]";
+    private static final String MSG_SEHARUSNYA_TOLAK = "[Hasil] Seharusnya ditolak! [FAIL]";
+
     // --- Repositories ---
     private static InMemoryBorrowerRepository   borrowerRepo;
     private static InMemoryLoanRepository       loanRepo;
@@ -194,7 +199,9 @@ public class LendingApp {
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("30000000")));
         System.out.println("Invest BUDI invest Rp 30.000.000 (100%)");
 
-        BigDecimal saldoBudiSetelah = lenderRepo.findById(budi.getId()).get().getSaldo().getAmount();
+        BigDecimal saldoBudiSetelah = lenderRepo.findById(budi.getId())
+                .orElseThrow(() -> new IllegalStateException("Lender tidak ditemukan"))
+                .getSaldo().getAmount();
         System.out.printf("Saldo BUDI sisa: Rp %,.0f%n", saldoBudiSetelah);
         System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
 
@@ -283,7 +290,8 @@ public class LendingApp {
         System.out.printf("Schedule %d cicilan digenerate%n", schedule.size());
 
         String firstPaymentId = schedule.get(0).getId();
-        Payment firstPayment = paymentRepo.findById(firstPaymentId).get();
+        Payment firstPayment = paymentRepo.findById(firstPaymentId)
+                .orElseThrow(() -> new IllegalStateException("Payment tidak ditemukan"));
 
         // Simulasi: ganti dueDate jadi 40 hari lalu
         Payment overduePayment = new Payment(
@@ -364,9 +372,11 @@ public class LendingApp {
                 iman.getId(), loan.getId(), new Money(new BigDecimal("6000000"), "IDR")));
 
         LoanStatus loanStatus     = getLoanStatus(loan.getId());
-        LoanApplication cancelled = loanRepo.findById(loan.getId()).get();
+        LoanApplication cancelled = loanRepo.findById(loan.getId())
+                .orElseThrow(() -> new IllegalStateException("Loan tidak ditemukan"));
         int countAfter            = getCancellationCount(iman.getId());
-        Borrower borrower         = borrowerRepo.findById(iman.getId()).get();
+        Borrower borrower         = borrowerRepo.findById(iman.getId())
+                .orElseThrow(() -> new IllegalStateException("Borrower tidak ditemukan"));
 
         System.out.printf("Status: %s%n", loanStatus);
         System.out.println("\nHasil");
@@ -400,7 +410,8 @@ public class LendingApp {
             System.out.printf("Cancel ke-%d : count = %d%n", i, getCancellationCount(iman.getId()));
         }
 
-        Borrower borrowerAfter = borrowerRepo.findById(iman.getId()).get();
+        Borrower borrowerAfter = borrowerRepo.findById(iman.getId())
+                .orElseThrow(() -> new IllegalStateException("Borrower tidak ditemukan"));
         System.out.println("\nHasil");
         System.out.printf("Cancellation count = 3     : %s %n", borrowerAfter.getCancellationCount() == 3);
         System.out.printf("lastBlockedDate tidak null : %s %n", borrowerAfter.getLastBlockedDate() != null);
@@ -451,7 +462,8 @@ public class LendingApp {
                     iman.getId(), l.getId(), new Money(new BigDecimal("6000000"), "IDR")));
         }
 
-        Borrower blockedBorrower = borrowerRepo.findById(iman.getId()).get();
+        Borrower blockedBorrower = borrowerRepo.findById(iman.getId())
+                .orElseThrow(() -> new IllegalStateException("Borrower tidak ditemukan"));
         System.out.println("\nHasil");
         System.out.printf("Cancellation count = 3     : %s %n", blockedBorrower.getCancellationCount() == 3);
         System.out.printf("lastBlockedDate tidak null : %s %n", blockedBorrower.getLastBlockedDate() != null);
@@ -464,8 +476,8 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Kemal Peminjam", "085555555555", KTP_KEMAL,
-                "Jl. Kuningan No. 7", 5_000_000L, 650));
+                "Kemal Peminjam", TELEPON_KEMAL, KTP_KEMAL,
+                ALAMAT_KEMAL, 5_000_000L, 650));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
@@ -487,8 +499,8 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Kemal Peminjam", "085555555555", KTP_KEMAL,
-                "Jl. Kuningan No. 7", 5_000_000L, 650));
+                "Kemal Peminjam", TELEPON_KEMAL, KTP_KEMAL,
+                ALAMAT_KEMAL, 5_000_000L, 650));
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
@@ -496,7 +508,7 @@ public class LendingApp {
 
         try {
             disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-            System.out.println("[Hasil] Seharusnya gagal! [FAIL]");
+            System.out.println(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalStateException e) {
             System.out.printf("Hasil Disburse ditolak dengan IllegalStateException %n");
             System.out.printf("Pesan: %s%n", e.getMessage());
@@ -510,8 +522,8 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Kemal Peminjam", "085555555555", KTP_KEMAL,
-                "Jl. Kuningan No. 7", 5_000_000L, 650));
+                "Kemal Peminjam", TELEPON_KEMAL, KTP_KEMAL,
+                ALAMAT_KEMAL, 5_000_000L, 650));
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
@@ -519,7 +531,7 @@ public class LendingApp {
 
         try {
             approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-            System.out.println("[Hasil] Seharusnya gagal! [FAIL]");
+            System.out.println(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalStateException e) {
             System.out.printf("Hasil Approve ditolak dengan IllegalStateException %n");
             System.out.printf("Pesan: %s%n", e.getMessage());
@@ -546,7 +558,7 @@ public class LendingApp {
         try {
             investLoanUseCase.execute(
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("5000000")));
-            System.out.println("[Hasil] Seharusnya ditolak! [FAIL]");
+            System.out.println(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
             System.out.printf("Invest ditolak dengan IllegalArgumentException %n");
             System.out.printf("Pesan: %s%n", e.getMessage());
@@ -573,7 +585,7 @@ public class LendingApp {
         try {
             investLoanUseCase.execute(
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
-            System.out.println("[Hasil] Seharusnya ditolak! [FAIL]");
+            System.out.println(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
             System.out.printf("Invest ditolak dengan IllegalArgumentException %n");
             System.out.printf("Pesan: %s%n", e.getMessage());
@@ -600,7 +612,7 @@ public class LendingApp {
         try {
             investLoanUseCase.execute(
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("10000000")));
-            System.out.println("[Hasil] Seharusnya ditolak! [FAIL]");
+            System.out.println(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
             System.out.printf("Invest ditolak dengan IllegalArgumentException %n");
             System.out.printf("Pesan: %s%n", e.getMessage());
@@ -616,7 +628,7 @@ public class LendingApp {
         try {
             applyLoanUseCase.execute(
                     new ApplyLoanCommand("BORROWER-TIDAK-ADA", 10_000_000L, 6));
-            System.out.println("[Hasil] Seharusnya gagal! [FAIL]");
+            System.out.println(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalArgumentException e) {
             System.out.printf("Apply ditolak dengan IllegalArgumentException %n");
             System.out.printf("Pesan: %s%n", e.getMessage());
