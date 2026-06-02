@@ -12,15 +12,9 @@
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>17</maven.compiler.release>
-    <!-- SonarQube Properties -->
-    <sonar.host.url>http://localhost:9000</sonar.host.url>
-    <sonar.projectKey>pinjamanjavva</sonar.projectKey>
-    <sonar.projectName>pinjamanjavva</sonar.projectName>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-  </properties>
+    <properties>
+      <sonar.organization>iimanexe</sonar.organization>
+    </properties>
 
   <dependencies>
     <dependency>
