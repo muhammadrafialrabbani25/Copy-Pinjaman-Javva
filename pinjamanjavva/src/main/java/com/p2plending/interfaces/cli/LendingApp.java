@@ -45,24 +45,49 @@ import java.util.List;
 
 public class LendingApp {
 
-    // --- Constants (sama persis dengan EndToEndFlowTest) ---
     private static final String KTP_IMAN  = "1111222233334444";
     private static final String KTP_BUDI  = "5555666677778888";
     private static final String KTP_KEMAL = "3333444455556666";
 
-    private static final String TELEPON_KEMAL       = "085555555555";
-    private static final String ALAMAT_KEMAL        = "Jl. Kuningan No. 7";
-    private static final String MSG_SEHARUSNYA_FAIL = "[Hasil] Seharusnya gagal! [FAIL]";
+    // Borrower IMAN
+    private static final String NAMA_IMAN    = "Iman Santoso";
+    private static final String TELEPON_IMAN = "081111111111";
+    private static final String ALAMAT_IMAN  = "Jl. Merdeka No. 1";
+
+    // Borrower KEMAL
+    private static final String NAMA_KEMAL    = "Kemal Peminjam";
+    private static final String TELEPON_KEMAL = "085555555555";
+    private static final String ALAMAT_KEMAL  = "Jl. Kuningan No. 7";
+
+    // Lender BUDI
+    private static final String NAMA_BUDI      = "Budi Investor";
+    private static final String TELEPON_BUDI   = "082222222222";
+    private static final String ALAMAT_BUDI    = "Jl. Sudirman No. 99";
+    private static final String PEKERJAAN_BUDI = "Wirausaha";
+
+    // Nominal
+    private static final String NOMINAL_6JT  = "6000000";
+    private static final String NOMINAL_5JT  = "5000000";
+
+    // Format output
+    private static final String FMT_STATUS   = "Status: %s%n";
+    private static final String FMT_PESAN    = "Pesan: %s%n";
+    private static final String FMT_HASIL    = "\nHasil";
+    private static final String INVEST_DITOLAK   = "Invest ditolak dengan IllegalArgumentException %n";
+    private static final String MSG_BORROWER_NOT_FOUND = "Borrower tidak ditemukan";
+
+    // Pesan hasil edge case
+    private static final String MSG_SEHARUSNYA_FAIL  = "[Hasil] Seharusnya gagal! [FAIL]";
     private static final String MSG_SEHARUSNYA_TOLAK = "[Hasil] Seharusnya ditolak! [FAIL]";
 
-    // --- Repositories ---
+    // Repositories
     private static InMemoryBorrowerRepository   borrowerRepo;
     private static InMemoryLoanRepository       loanRepo;
     private static InMemoryLenderRepository     lenderRepo;
     private static InMemoryInvestmentRepository investmentRepo;
     private static InMemmoryPaymentRepository   paymentRepo;
 
-    // --- Use Cases ---
+    // Use Cases
     private static RegisterBorrowerUseCase       registerBorrowerUseCase;
     private static ApplyLoanUseCaseImpl          applyLoanUseCase;
     private static ApproveLoanUseCaseImpl        approveLoanUseCase;
@@ -178,21 +203,21 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 750));
         System.out.printf("[Borrower] Terdaftar: %s | id: %s%n", iman.getNama(), iman.getId());
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
         System.out.printf("Loan diajukan: %s | Rp 30.000.000 | 6 bulan%n", loan.getId());
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("50000000")));
         System.out.printf("Lender Terdaftar: %s | saldo: Rp 50.000.000%n", budi.getNama());
 
         investLoanUseCase.execute(
@@ -203,10 +228,10 @@ public class LendingApp {
                 .orElseThrow(() -> new IllegalStateException("Lender tidak ditemukan"))
                 .getSaldo().getAmount();
         System.out.printf("Saldo BUDI sisa: Rp %,.0f%n", saldoBudiSetelah);
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         System.out.println("\nHasil Skenario 1");
         System.out.printf("Loan status : %s%n", getLoanStatus(loan.getId()));
@@ -220,8 +245,8 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 750));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
@@ -230,15 +255,15 @@ public class LendingApp {
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("50000000")));
 
         investLoanUseCase.execute(
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
         System.out.printf("Schedule %d cicilan digenerate%n", schedule.size());
@@ -267,8 +292,8 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 750));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 12_000_000L, 12));
@@ -277,14 +302,14 @@ public class LendingApp {
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("50000000")));
 
         investLoanUseCase.execute(
                 new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("12000000")));
 
         disburseUseCase.execute(new DisburseLoanCommand(loan.getId()));
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         List<PaymentDTO> schedule = getPaymentScheduleUseCase.execute(iman.getId(), loan.getId());
         System.out.printf("Schedule %d cicilan digenerate%n", schedule.size());
@@ -332,8 +357,8 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 700));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 700));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 20_000_000L, 6));
@@ -341,7 +366,7 @@ public class LendingApp {
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), false));
 
         LoanStatus status = getLoanStatus(loan.getId());
-        System.out.printf("Status: %s%n", status);
+        System.out.printf(FMT_STATUS, status);
         System.out.printf("Hasil Loan status CANCELLED : %s %n", status == LoanStatus.CANCELLED);
     }
 
@@ -353,33 +378,33 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 700));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 700));
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("20000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("20000000")));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 3));
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
         investLoanUseCase.execute(
-                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+                new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_6JT)));
 
         int countBefore = getCancellationCount(iman.getId());
 
         cancelLoanUseCase.execute(new CancelLoanCommand(
-                iman.getId(), loan.getId(), new Money(new BigDecimal("6000000"), "IDR")));
+                iman.getId(), loan.getId(), new Money(new BigDecimal(NOMINAL_6JT), "IDR")));
 
         LoanStatus loanStatus     = getLoanStatus(loan.getId());
         LoanApplication cancelled = loanRepo.findById(loan.getId())
                 .orElseThrow(() -> new IllegalStateException("Loan tidak ditemukan"));
         int countAfter            = getCancellationCount(iman.getId());
         Borrower borrower         = borrowerRepo.findById(iman.getId())
-                .orElseThrow(() -> new IllegalStateException("Borrower tidak ditemukan"));
+                .orElseThrow(() -> new IllegalStateException(MSG_BORROWER_NOT_FOUND));
 
-        System.out.printf("Status: %s%n", loanStatus);
-        System.out.println("\nHasil");
+        System.out.printf(FMT_STATUS, loanStatus);
+        System.out.println(FMT_HASIL);
         System.out.printf("Loan status CANCELLED      : %s %n", loanStatus == LoanStatus.CANCELLED);
         System.out.printf("cancelledDate tidak null   : %s %n", cancelled.getCancelledDate() != null);
         System.out.printf("Counter %d -> %d (+1)       : %s %n", countBefore, countAfter, countAfter == countBefore + 1);
@@ -393,26 +418,26 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 750));
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("100000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("100000000")));
 
         for (int i = 1; i <= 3; i++) {
             LoanDTO loan = applyLoanUseCase.execute(
                     new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
             approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
             investLoanUseCase.execute(
-                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_6JT)));
             cancelLoanUseCase.execute(new CancelLoanCommand(
-                    iman.getId(), loan.getId(), new Money(new BigDecimal("6000000"), "IDR")));
+                    iman.getId(), loan.getId(), new Money(new BigDecimal(NOMINAL_6JT), "IDR")));
             System.out.printf("Cancel ke-%d : count = %d%n", i, getCancellationCount(iman.getId()));
         }
 
         Borrower borrowerAfter = borrowerRepo.findById(iman.getId())
-                .orElseThrow(() -> new IllegalStateException("Borrower tidak ditemukan"));
-        System.out.println("\nHasil");
+                .orElseThrow(() -> new IllegalStateException(MSG_BORROWER_NOT_FOUND));
+        System.out.println(FMT_HASIL);
         System.out.printf("Cancellation count = 3     : %s %n", borrowerAfter.getCancellationCount() == 3);
         System.out.printf("lastBlockedDate tidak null : %s %n", borrowerAfter.getLastBlockedDate() != null);
     }
@@ -424,18 +449,18 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 700));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 700));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
 
         cancelLoanUseCase.execute(new CancelLoanCommand(
-                iman.getId(), loan.getId(), new Money(new BigDecimal("5000000"), "IDR")));
+                iman.getId(), loan.getId(), new Money(new BigDecimal(NOMINAL_5JT), "IDR")));
 
         LoanStatus status = getLoanStatus(loan.getId());
-        System.out.printf("Status: %s%n", status);
+        System.out.printf(FMT_STATUS, status);
         System.out.printf("Hasil Loan status CANCELLED : %s %n", status == LoanStatus.CANCELLED);
     }
 
@@ -446,25 +471,25 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 750));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 750));
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("200000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("200000000")));
 
         for (int i = 0; i < 3; i++) {
             LoanDTO l = applyLoanUseCase.execute(
                     new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
             approveLoanUseCase.execute(new ApproveLoanCommand(l.getId(), true));
             investLoanUseCase.execute(
-                    new InvestCommand(budi.getId(), l.getId(), new BigDecimal("6000000")));
+                    new InvestCommand(budi.getId(), l.getId(), new BigDecimal(NOMINAL_6JT)));
             cancelLoanUseCase.execute(new CancelLoanCommand(
-                    iman.getId(), l.getId(), new Money(new BigDecimal("6000000"), "IDR")));
+                    iman.getId(), l.getId(), new Money(new BigDecimal(NOMINAL_6JT), "IDR")));
         }
 
         Borrower blockedBorrower = borrowerRepo.findById(iman.getId())
-                .orElseThrow(() -> new IllegalStateException("Borrower tidak ditemukan"));
-        System.out.println("\nHasil");
+                .orElseThrow(() -> new IllegalStateException(MSG_BORROWER_NOT_FOUND));
+        System.out.println(FMT_HASIL);
         System.out.printf("Cancellation count = 3     : %s %n", blockedBorrower.getCancellationCount() == 3);
         System.out.printf("lastBlockedDate tidak null : %s %n", blockedBorrower.getLastBlockedDate() != null);
     }
@@ -476,17 +501,17 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Kemal Peminjam", TELEPON_KEMAL, KTP_KEMAL,
+                NAMA_KEMAL, TELEPON_KEMAL, KTP_KEMAL,
                 ALAMAT_KEMAL, 5_000_000L, 650));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
 
         approveLoanUseCase.execute(new ApproveLoanCommand(loan.getId(), true));
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         expireLoanFunding(loan.getId());
-        System.out.printf("Status: %s%n", getLoanStatus(loan.getId()));
+        System.out.printf(FMT_STATUS, getLoanStatus(loan.getId()));
 
         System.out.printf("Hasi Loan status EXPIRED_FUNDING : %s %n",
                 getLoanStatus(loan.getId()) == LoanStatus.EXPIRED_FUNDING);
@@ -499,7 +524,7 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Kemal Peminjam", TELEPON_KEMAL, KTP_KEMAL,
+                NAMA_KEMAL, TELEPON_KEMAL, KTP_KEMAL,
                 ALAMAT_KEMAL, 5_000_000L, 650));
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
@@ -511,7 +536,7 @@ public class LendingApp {
             System.out.println(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalStateException e) {
             System.out.printf("Hasil Disburse ditolak dengan IllegalStateException %n");
-            System.out.printf("Pesan: %s%n", e.getMessage());
+            System.out.printf(FMT_PESAN, e.getMessage());
         }
     }
 
@@ -522,7 +547,7 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO kemal = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Kemal Peminjam", TELEPON_KEMAL, KTP_KEMAL,
+                NAMA_KEMAL, TELEPON_KEMAL, KTP_KEMAL,
                 ALAMAT_KEMAL, 5_000_000L, 650));
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(kemal.getId(), 15_000_000L, 12));
@@ -534,7 +559,7 @@ public class LendingApp {
             System.out.println(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalStateException e) {
             System.out.printf("Hasil Approve ditolak dengan IllegalStateException %n");
-            System.out.printf("Pesan: %s%n", e.getMessage());
+            System.out.printf(FMT_PESAN, e.getMessage());
         }
     }
 
@@ -545,11 +570,11 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 700));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 700));
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("20000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("20000000")));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
@@ -557,11 +582,11 @@ public class LendingApp {
 
         try {
             investLoanUseCase.execute(
-                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("5000000")));
+                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_5JT)));
             System.out.println(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
-            System.out.printf("Invest ditolak dengan IllegalArgumentException %n");
-            System.out.printf("Pesan: %s%n", e.getMessage());
+            System.out.printf(INVEST_DITOLAK);
+            System.out.printf(FMT_PESAN, e.getMessage());
         }
     }
 
@@ -572,11 +597,11 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 700));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 700));
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("5000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal(NOMINAL_5JT)));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
@@ -584,11 +609,11 @@ public class LendingApp {
 
         try {
             investLoanUseCase.execute(
-                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("6000000")));
+                    new InvestCommand(budi.getId(), loan.getId(), new BigDecimal(NOMINAL_6JT)));
             System.out.println(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
-            System.out.printf("Invest ditolak dengan IllegalArgumentException %n");
-            System.out.printf("Pesan: %s%n", e.getMessage());
+            System.out.printf(INVEST_DITOLAK);
+            System.out.printf(FMT_PESAN, e.getMessage());
         }
     }
 
@@ -599,11 +624,11 @@ public class LendingApp {
         System.out.println("-".repeat(55));
 
         BorrowerDTO iman = registerBorrowerUseCase.execute(new RegisterBorrowerCommand(
-                "Iman Santoso", "081111111111", KTP_IMAN,
-                "Jl. Merdeka No. 1", 10_000_000L, 700));
+                NAMA_IMAN, TELEPON_IMAN, KTP_IMAN,
+                ALAMAT_IMAN, 10_000_000L, 700));
         LenderDTO budi = registerLenderUseCase.execute(new RegisterLenderCommand(
-                "Budi Investor", "082222222222", KTP_BUDI,
-                "Jl. Sudirman No. 99", "Wirausaha", new BigDecimal("50000000")));
+                NAMA_BUDI, TELEPON_BUDI, KTP_BUDI,
+                ALAMAT_BUDI, PEKERJAAN_BUDI, new BigDecimal("50000000")));
 
         LoanDTO loan = applyLoanUseCase.execute(
                 new ApplyLoanCommand(iman.getId(), 30_000_000L, 6));
@@ -614,8 +639,8 @@ public class LendingApp {
                     new InvestCommand(budi.getId(), loan.getId(), new BigDecimal("10000000")));
             System.out.println(MSG_SEHARUSNYA_TOLAK);
         } catch (IllegalArgumentException e) {
-            System.out.printf("Invest ditolak dengan IllegalArgumentException %n");
-            System.out.printf("Pesan: %s%n", e.getMessage());
+            System.out.printf(INVEST_DITOLAK);
+            System.out.printf(FMT_PESAN, e.getMessage());
         }
     }
 
@@ -631,7 +656,7 @@ public class LendingApp {
             System.out.println(MSG_SEHARUSNYA_FAIL);
         } catch (IllegalArgumentException e) {
             System.out.printf("Apply ditolak dengan IllegalArgumentException %n");
-            System.out.printf("Pesan: %s%n", e.getMessage());
+            System.out.printf(FMT_PESAN, e.getMessage());
         }
     }
 
