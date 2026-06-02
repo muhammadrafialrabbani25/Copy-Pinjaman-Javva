@@ -36,5 +36,9 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=iimanexe_A4-Pinjaman-Javva
-
+        run: |
+          mvn -X -B verify \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=iimanexe_A4-Pinjaman-Javva \
+            -Dsonar.organization=iimanexe \
+            -Dsonar.host.url=https://sonarcloud.io

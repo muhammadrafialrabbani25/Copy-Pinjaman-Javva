@@ -3,7 +3,6 @@ package com.p2plending.domain.borrower.entity;
 import com.p2plending.domain.shared.LoanStatus;
 import com.p2plending.domain.shared.Money;
 import com.p2plending.domain.shared.Tenor;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class LoanApplication {
