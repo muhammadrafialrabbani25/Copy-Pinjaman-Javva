@@ -10,7 +10,6 @@ import com.p2plending.domain.lender.entity.Investment;
 import com.p2plending.domain.lender.repository.InvestmentRepository;
 import com.p2plending.domain.shared.Money;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

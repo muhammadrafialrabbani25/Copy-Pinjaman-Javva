@@ -10,8 +10,6 @@ import com.p2plending.domain.borrower.repository.PaymentRepository;
 import com.p2plending.domain.borrower.service.RepaymentService;
 import com.p2plending.domain.shared.LoanStatus;
 
-import java.util.Optional;
-
 public class MakePaymentUseCaseImpl implements MakePaymentUseCase {
 
     private final BorrowerRepository borrowerRepository;
